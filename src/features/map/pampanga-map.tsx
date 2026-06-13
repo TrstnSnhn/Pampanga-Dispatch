@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/map";
 import type { Booking } from "@/domain/booking";
 import type { PampangaLocation } from "@/domain/location";
+import type { RouteResult } from "@/domain/route";
+import { formatApproxDistance } from "@/lib/distance";
 import { cn } from "@/lib/utils";
 
 type PampangaMapProps = {
@@ -18,6 +20,7 @@ type PampangaMapProps = {
   previewBooking: Booking;
   pickupLocation: PampangaLocation;
   dropOffLocation: PampangaLocation;
+  routePreview: RouteResult;
 };
 
 const pampangaCenter: [number, number] = [120.67, 15.04];
@@ -56,11 +59,11 @@ export function PampangaMap({
   previewBooking,
   pickupLocation,
   dropOffLocation,
+  routePreview,
 }: PampangaMapProps) {
-  const previewCoordinates: [number, number][] = [
-    [pickupLocation.longitude, pickupLocation.latitude],
-    [dropOffLocation.longitude, dropOffLocation.latitude],
-  ];
+  const isRoadRoute =
+    routePreview.provider === "osrm_demo" && !routePreview.isFallback;
+  const routeLineColor = isRoadRoute ? "#246b8f" : "#2f7d52";
 
   return (
     <div className="pd-card relative overflow-hidden rounded-3xl">
@@ -81,6 +84,17 @@ export function PampangaMap({
             <span className="size-2 rounded-full bg-[var(--info-foreground)]" />
             Drop-off
           </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span
+              className={cn(
+                "h-0 w-5 border-t-2",
+                isRoadRoute
+                  ? "border-[var(--info-foreground)]"
+                  : "border-dashed border-[var(--success-foreground)]",
+              )}
+            />
+            {isRoadRoute ? "OSRM route" : "Visual line"}
+          </span>
         </div>
       </div>
 
@@ -100,12 +114,13 @@ export function PampangaMap({
         />
 
         <MapRoute
-          id="booking-preview-line"
-          coordinates={previewCoordinates}
-          color="#2f7d52"
-          width={2}
-          opacity={0.72}
-          dashArray={[2, 2]}
+          key={isRoadRoute ? "osrm-demo-route" : "straight-line-route"}
+          id={isRoadRoute ? "booking-osrm-demo-route" : "booking-straight-line"}
+          coordinates={routePreview.coordinates}
+          color={routeLineColor}
+          width={isRoadRoute ? 4 : 2}
+          opacity={isRoadRoute ? 0.78 : 0.72}
+          dashArray={isRoadRoute ? undefined : [2, 2]}
           interactive={false}
         />
 
@@ -160,12 +175,18 @@ export function PampangaMap({
 
       <div className="absolute bottom-4 left-4 max-w-[calc(100%-2rem)] rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-xs shadow-[0_16px_42px_var(--shadow-color)]">
         <p className="font-semibold text-[var(--foreground)]">
-          {previewBooking.id}: visual pickup to drop-off preview only
+          {previewBooking.id}: {routePreview.sourceLabel}
         </p>
         <p className="mt-1 text-[var(--muted-foreground)]">
-          Dashed line is not road routing. OSRM or another routing service is
-          not connected yet.
+          {isRoadRoute
+            ? `${routePreview.distanceKm.toFixed(1)} km road distance, ${routePreview.durationMinutes} min demo estimate.`
+            : `${formatApproxDistance(routePreview.distanceKm)}. Dashed line does not follow roads.`}
         </p>
+        {routePreview.errorMessage ? (
+          <p className="mt-1 font-medium text-[var(--warning-foreground)]">
+            {routePreview.errorMessage}
+          </p>
+        ) : null}
       </div>
     </div>
   );

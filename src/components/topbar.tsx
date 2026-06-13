@@ -8,7 +8,7 @@ export function Topbar() {
           Pampanga operations dashboard
         </p>
         <p className="text-xs leading-5 text-[var(--muted-foreground)]">
-          Map-first sample workspace, local data, no live routing yet
+          Map-first sample workspace, local data, optional demo routing
         </p>
       </div>
       <div className="hidden items-center gap-2 lg:flex">
@@ -18,7 +18,7 @@ export function Topbar() {
         </span>
         <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs font-medium text-[var(--muted-foreground)]">
           <Route className="size-3.5 text-[var(--clay)]" />
-          Routing pending
+          OSRM demo
         </span>
         <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs font-medium text-[var(--muted-foreground)]">
           <Database className="size-3.5 text-[var(--map-blue)]" />

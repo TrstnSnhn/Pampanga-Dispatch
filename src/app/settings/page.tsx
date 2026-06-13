@@ -22,10 +22,11 @@ const settings = [
   },
   {
     label: "Routing",
-    value: "Not yet enabled",
-    badge: "Later phase",
-    detail: "Route drawing and estimates are planned for a later phase.",
-    tone: "warning" as const,
+    value: "Demo only",
+    badge: "OSRM optional",
+    detail:
+      "The map can request an OSRM demo road route, with straight-line preview as fallback.",
+    tone: "info" as const,
     icon: Route,
   },
   {
@@ -65,10 +66,10 @@ export default function SettingsPage() {
         />
         <MetricCard
           label="Routing"
-          value="Off"
-          note="No OSRM integration"
+          value="Demo"
+          note="OSRM optional"
           icon={Route}
-          tone="amber"
+          tone="blue"
         />
         <MetricCard
           label="Database"

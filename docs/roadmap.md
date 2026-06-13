@@ -64,16 +64,19 @@ Outcome: The app now supports local session booking intake, driver assignment, a
 
 ## Phase 4: Routing and Estimates
 
-Status: Planned.
+Status: In progress. Phase 4A road route preview is complete.
 
 Milestones:
 
-- Add route previews between pickup and drop-off points.
-- Calculate distance, estimated duration, and price estimates.
-- Show service-specific estimate details before booking confirmation.
-- Handle edge cases for missing routes or invalid locations.
+- Keep a straight-line pickup/drop-off preview as the default fallback. Complete in Phase 4A.
+- Add an optional OSRM demo road-route lookup triggered by the user. Complete in Phase 4A.
+- Show the difference between approximate straight-line distance and demo road-route distance/duration. Complete in Phase 4A.
+- Handle missing or unavailable OSRM routes without breaking the map. Complete in Phase 4A.
+- Calculate service-specific estimate details before booking confirmation. Planned.
+- Decide whether road-route distance should influence pricing, and label it clearly if added. Planned.
+- Add route polish such as clearer selected booking context, route reset controls, and better error states. Planned for Phase 4B.
 
-Outcome: Bookings include useful route and cost context instead of static placeholder values.
+Outcome: The map now has useful route context without pretending to provide production-grade routing. Straight-line distance remains the price estimate basis, and OSRM is treated as optional demo infrastructure.
 
 ## Phase 5: Portfolio Polish
 

@@ -128,11 +128,11 @@ export default function Home() {
               <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted-foreground)]">
                 The current workspace connects local booking records, driver
                 availability, and a Pampanga map preview without pretending
-                real routing is ready.
+                demo routing is production infrastructure.
               </p>
             </div>
-            <StatusPill tone="warning" dot>
-              Routing not enabled
+            <StatusPill tone="info" dot>
+              OSRM demo optional
             </StatusPill>
           </div>
 

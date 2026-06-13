@@ -1,6 +1,6 @@
 # Logic Notes
 
-Phase 3A added practical local booking and dispatch behavior for the modern Pampanga Dispatch app. Phase 3B extends it with session-only lifecycle management. The logic is intentionally small, deterministic, and honest about its limits.
+Phase 3A added practical local booking and dispatch behavior for the modern Pampanga Dispatch app. Phase 3B extends it with session-only lifecycle management. Phase 4A adds an optional demo road-route preview while keeping the straight-line fallback. The logic is intentionally small, deterministic, and honest about its limits.
 
 ## Local Demo State
 
@@ -17,6 +17,16 @@ Phase 3A added practical local booking and dispatch behavior for the modern Pamp
 - The value is labeled as approximate.
 - It is not road distance and does not account for traffic, road shape, closures, or routing constraints.
 - The map dashed line remains a visual preview only.
+- Phase 4A can request an optional OSRM demo road route from the map page, but that value is shown separately from the booking price estimate.
+
+## Route Preview Assumptions
+
+- Straight-line preview is available by default and never requires a network request.
+- OSRM demo routing is requested only when the user clicks `Calculate road route`.
+- OSRM request and response geometry coordinates use `[longitude, latitude]` order.
+- OSRM road distance and duration are labeled as demo references.
+- If OSRM is unavailable or returns malformed data, the app keeps showing the straight-line fallback.
+- See [routing-notes.md](routing-notes.md) for the fuller routing explanation.
 
 ## Price Estimate Assumptions
 
@@ -24,6 +34,7 @@ Phase 3A added practical local booking and dispatch behavior for the modern Pamp
 - Each service has a simple base fare, per-kilometer rate, and minimum fare.
 - Prices are rounded to the nearest ten pesos.
 - These estimates are demo values, not production pricing rules.
+- Phase 4A does not silently change booking prices after a road-route lookup.
 
 ## Driver Assignment Assumptions
 
@@ -60,8 +71,8 @@ Completed and cancelled bookings are terminal states in this phase.
 
 - No persistence after refresh.
 - No server-side conflict checks.
-- No real routing, OSRM, duration estimate, or traffic model.
-- No map route snapping to roads.
+- OSRM is optional demo routing, not production route infrastructure.
+- No traffic model, route caching, route persistence, or multi-stop optimization.
 - No account, role, or authentication model.
 - No production-grade pricing rules.
 - Driver current locations are static sample values.
