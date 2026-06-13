@@ -43,7 +43,73 @@ export default function BookingsPage() {
           </div>
           <StatusPill tone="neutral">{sampleBookings.length} total</StatusPill>
         </div>
-        <div className="overflow-x-auto">
+        <div className="grid gap-3 p-3 md:hidden">
+          {sampleBookings.map((booking) => (
+            <article
+              key={booking.id}
+              className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-[var(--foreground)]">
+                    {booking.id}
+                  </p>
+                  <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                    Local sample record
+                  </p>
+                </div>
+                <StatusPill tone={statusTone[booking.status]} dot>
+                  {dispatchStatusLabels[booking.status]}
+                </StatusPill>
+              </div>
+
+              <div className="mt-4">
+                <ServiceBadge serviceType={booking.serviceType} />
+              </div>
+
+              <div className="mt-4 grid gap-3 rounded-xl bg-[var(--surface-raised)] p-3">
+                <div>
+                  <p className="text-xs font-medium text-[var(--muted-foreground)]">
+                    Pickup
+                  </p>
+                  <p className="font-medium text-[var(--foreground)]">
+                    {getLocationName(booking.pickupLocationId)}
+                  </p>
+                </div>
+                <div className="h-px bg-[var(--border)]" />
+                <div>
+                  <p className="text-xs font-medium text-[var(--muted-foreground)]">
+                    Drop-off
+                  </p>
+                  <p className="font-medium text-[var(--foreground)]">
+                    {getLocationName(booking.dropOffLocationId)}
+                  </p>
+                </div>
+              </div>
+
+              <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <dt className="text-xs font-medium text-[var(--muted-foreground)]">
+                    Driver
+                  </dt>
+                  <dd className="mt-1 font-medium text-[var(--foreground)]">
+                    {getDriverName(booking.driverId)}
+                  </dd>
+                </div>
+                <div className="text-right">
+                  <dt className="text-xs font-medium text-[var(--muted-foreground)]">
+                    Estimate
+                  </dt>
+                  <dd className="mt-1 font-semibold text-[var(--foreground)]">
+                    {formatPeso(booking.priceEstimate)}
+                  </dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[820px] border-separate border-spacing-0 text-left text-sm">
             <thead className="bg-[var(--surface)] text-xs text-[var(--muted-foreground)]">
               <tr>

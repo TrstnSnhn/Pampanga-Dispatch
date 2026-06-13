@@ -28,7 +28,7 @@ export function SidebarNav() {
   return (
     <nav
       aria-label="Main navigation"
-      className="flex gap-1 overflow-x-auto pb-1 md:grid md:gap-1.5 md:overflow-visible md:pb-0"
+      className="grid grid-cols-3 gap-1 md:grid-cols-1 md:gap-1.5"
     >
       {navItems.map((item) => {
         const Icon = item.icon;
@@ -40,7 +40,7 @@ export function SidebarNav() {
             key={item.href}
             href={item.href}
             className={cn(
-              "pd-pressable inline-flex min-w-fit items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-[var(--sidebar-muted)] hover:bg-[var(--nav-hover)] hover:text-[var(--accent-foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] md:w-full",
+              "pd-pressable inline-flex items-center justify-center gap-1.5 rounded-xl px-2.5 py-2 text-xs font-medium text-[var(--sidebar-muted)] hover:bg-[var(--nav-hover)] hover:text-[var(--accent-foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] sm:gap-2 sm:px-3 sm:py-2.5 sm:text-sm md:w-full md:justify-start",
               isActive &&
                 "bg-[var(--nav-active)] text-[var(--accent-foreground)] shadow-[inset_0_0_0_1px_oklch(1_0_0/0.11)]",
             )}
