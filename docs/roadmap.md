@@ -83,13 +83,15 @@ Outcome: The map now has useful route context without pretending to provide prod
 
 ## Phase 5: Portfolio Polish
 
-Status: Planned.
+Status: In progress. Phase 5A portfolio packaging and repository cleanup are complete.
 
 Milestones:
 
-- Refine responsive layouts, empty states, loading states, and error states.
-- Add sample data and a strong demo flow for portfolio review.
-- Write technical documentation explaining the legacy-to-modern migration.
+- Refine responsive layouts, empty states, loading states, and error states. Ongoing.
+- Add sample data and a strong demo flow for portfolio review. Complete through Phase 5A.
+- Write technical documentation explaining the legacy-to-modern migration. Complete through Phase 5A.
+- Add portfolio README screenshots and GitHub presentation notes. Complete in Phase 5A.
+- Add final portfolio QA review notes. Complete in Phase 5A.
 - Add tests for core booking, dispatch, and estimate logic.
 - Prepare deployment and final README screenshots or demo notes.
 

@@ -14,9 +14,9 @@ The project began as a Java OOP college final project. The original version is a
 
 ## Modernization Goal
 
-The modernization goal is to rebuild the old CLI concept as a professional web application using Next.js, TypeScript, Tailwind, shadcn/ui, and mapcn. The new version should keep the original service categories while improving the product model, interface, routing experience, validation, and dispatch logic.
+The modernization goal is to rebuild the old CLI concept as a professional web application using Next.js, TypeScript, Tailwind, shadcn/ui-ready components, MapCN, MapLibre GL, and optional OSRM demo routing. The new version keeps the original service categories while improving the product model, interface, routing experience, validation, and dispatch logic.
 
-This session only documents and organizes the legacy project. The web app has not been scaffolded yet.
+The current web app is a local portfolio demo. It includes session-only state, local sample data, Pampanga map markers, dispatch workflow logic, and optional demo route previews. It does not include persistence, authentication, or production routing infrastructure yet.
 
 ## Target Users
 

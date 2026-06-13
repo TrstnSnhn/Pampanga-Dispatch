@@ -1,28 +1,82 @@
 # Pampanga Dispatch
 
-Pampanga Dispatch is a modernization project for an old Java OOP logistics and delivery management final project. The original version is a CLI-based booking system for rides, parcel deliveries, and food deliveries, with simple CSV persistence.
+Pampanga Dispatch is a Pampanga-based delivery dispatch and route preview app modernized from an old Java OOP CLI final project. The current app is a local demo that shows the migration path from command-line booking records to a map-driven web dispatch workflow.
+
+This is not a production logistics platform. State is session-only, there is no database yet, and OSRM road routing is optional demo infrastructure with a straight-line fallback.
+
+## Screenshots
+
+| Dashboard | Bookings | Dispatch |
+| --- | --- | --- |
+| <img src="docs/qa/phase-2c-visual-review/desktop-dashboard.png" alt="Pampanga Dispatch dashboard" width="360"> | <img src="docs/qa/phase-2c-visual-review/desktop-bookings.png" alt="Bookings page with local booking form and sample records" width="360"> | <img src="docs/qa/phase-2c-visual-review/desktop-dispatch.png" alt="Dispatch page with pending and active bookings" width="360"> |
+
+| Map straight-line preview | Map OSRM demo route |
+| --- | --- |
+| <img src="docs/qa/phase-4b-route-review/desktop-map-straight-preview.png" alt="Pampanga map with straight-line visual preview" width="540"> | <img src="docs/qa/phase-4b-route-review/desktop-map-road-route.png" alt="Pampanga map with optional OSRM demo road route" width="540"> |
+
+## Demo Status
+
+- Local demo app.
+- Session-only booking, driver, dispatch, and route preview state.
+- No database, authentication, or persistence yet.
+- Straight-line route preview is the default.
+- OSRM road route preview is user-triggered, optional, and demo-only.
+- Booking prices remain tied to the app's approximate straight-line estimate.
+
+## Feature Highlights
+
+- Pampanga-only service area with local city and municipality data.
+- Local booking creation for ride, parcel delivery, and food delivery.
+- Driver roster with availability, vehicle type, location, and service capability.
+- Deterministic driver suggestion and assignment.
+- Booking lifecycle: pending, assigned, picked up, in transit, completed, cancelled.
+- Driver release behavior after completion or valid cancellation.
+- MapCN and MapLibre-powered Pampanga map view.
+- Straight-line pickup/drop-off preview.
+- Optional OSRM demo route with road distance and duration.
+- Route fallback handling when OSRM is unavailable.
+
+## Tech Stack
+
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- shadcn/ui-ready component structure
+- MapCN
+- MapLibre GL
+- OSRM demo route preview
+- Node.js built-in test runner
 
 ## Legacy Project
 
-The original Java CLI project is preserved under `legacy/java-cli`. It has not been rewritten in this phase. The current documentation captures what the legacy code and CSV files do before the project moves into a modern web implementation.
+The original Java OOP CLI project is preserved under `legacy/java-cli`. It includes the college-final-project source code and CSV-based persistence from the CLI version. The modern web app does not rewrite that Java code; it documents the old system and uses it as the historical baseline for a staged modernization.
 
-See [docs/legacy-inventory.md](docs/legacy-inventory.md) for the full inventory.
+See [docs/legacy-inventory.md](docs/legacy-inventory.md) for the legacy inventory.
 
-## Planned Modern Stack
+## Architecture Overview
 
-- Next.js
-- TypeScript
-- Tailwind CSS
-- shadcn/ui
-- mapcn
+```text
+src/app/                    Next.js routes and API handlers
+src/components/             Shared app shell and UI primitives
+src/domain/                 Booking, driver, location, route, and status models
+src/data/                   Local Pampanga sample data
+src/features/dispatch/      Session-only demo state provider
+src/features/map/           Pampanga map and route preview components
+src/lib/                    Distance, pricing, dispatch, booking, and routing helpers
+tests/                      Node test runner coverage for dispatch and routing logic
+legacy/java-cli/            Preserved original Java CLI project
+docs/                       Project notes, QA evidence, and portfolio documentation
+```
 
-## Current Status
+Key implementation points:
 
-Phase 0 legacy preservation and documentation are complete. Phase 1 scaffolded the modern Next.js foundation with local sample data. Phase 2 added the Pampanga map view, visual polish, screenshot QA evidence, and mobile layout fixes.
+- `DispatchDemoProvider` holds local session state for bookings and drivers.
+- Domain types keep booking, driver, location, status, and route logic explicit.
+- Route helpers separate straight-line preview, OSRM parsing, fallback selection, and comparison values.
+- `/api/routes/osrm` validates coordinates and calls OSRM only when the user requests a route.
+- OSRM failures return typed fallback states instead of breaking the map.
 
-Phase 3A adds local-only booking creation, approximate straight-line distance estimates, service-based pricing estimates, deterministic driver suggestions, and session-only dispatch assignment. Phase 3B extends that into a complete local lifecycle: pending, assigned, picked up, in transit, completed, and cancelled where valid. Completing or cancelling an assigned booking releases the driver back to available.
-
-Phase 4A adds an optional OSRM demo road-route preview on the map. Phase 4B hardens that route experience with a clearer selected-booking panel, route comparison, reset/retry controls, timeout handling, and screenshot QA evidence. The app still defaults to the straight-line visual preview and keeps booking prices based on approximate straight-line distance unless a future phase changes that explicitly. No database connection has been added, no authentication is enabled, and local demo state resets on refresh.
+See [docs/architecture.md](docs/architecture.md) and [docs/routing-notes.md](docs/routing-notes.md) for more detail.
 
 ## Local Development
 
@@ -30,12 +84,54 @@ Phase 4A adds an optional OSRM demo road-route preview on the map. Phase 4B hard
 npm install
 npm run dev
 npm test
+npm run lint
+npm run build
 ```
 
-See [docs/logic-notes.md](docs/logic-notes.md) for the current local booking and dispatch assumptions.
-See [docs/routing-notes.md](docs/routing-notes.md) for the current straight-line and optional OSRM routing assumptions.
-See [docs/qa/phase-4b-route-review](docs/qa/phase-4b-route-review) for route-view QA screenshots and review notes.
+Then open `http://localhost:3000`.
+
+## Demo Flow
+
+A practical reviewer flow is documented in [docs/demo-script.md](docs/demo-script.md):
+
+1. Review the dashboard metrics.
+2. Create a local booking.
+3. Assign a driver in Dispatch.
+4. Move the booking through its lifecycle.
+5. Open the Pampanga map.
+6. Calculate an optional OSRM demo road route.
+7. Reset to the straight-line visual preview.
+
+## Current Limitations
+
+- State resets on refresh.
+- No authentication or user roles.
+- No database or persistence layer.
+- No production routing infrastructure.
+- No traffic model, road-closure data, or route caching.
+- No multi-stop optimization.
+- OSRM public demo availability can vary.
+- Map route bounds are not automatically fitted to every selected route.
 
 ## Roadmap
 
-See [docs/roadmap.md](docs/roadmap.md) for the phased modernization plan.
+- Persist bookings, assignments, and route previews.
+- Add deployment and hosted demo setup.
+- Add route caching and clearer routing provider boundaries.
+- Evaluate self-hosted OSRM or a production-grade route provider.
+- Add accessibility audit and keyboard-flow review.
+- Expand portfolio documentation with deployment notes.
+
+See [docs/roadmap.md](docs/roadmap.md) for the phased modernization roadmap.
+
+## Portfolio Notes
+
+- Case study: [docs/portfolio-case-study.md](docs/portfolio-case-study.md)
+- Architecture: [docs/architecture.md](docs/architecture.md)
+- Demo script: [docs/demo-script.md](docs/demo-script.md)
+- GitHub presentation notes: [docs/github-profile-notes.md](docs/github-profile-notes.md)
+- QA evidence: [docs/qa](docs/qa)
+
+## License
+
+No license has been selected yet.

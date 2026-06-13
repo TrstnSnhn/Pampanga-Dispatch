@@ -23,3 +23,8 @@ pnpm-debug.log*
 # system files
 .DS_Store
 Thumbs.db
+
+# local AI tooling artifacts
+.agents/
+.codex/
+skills-lock.json
