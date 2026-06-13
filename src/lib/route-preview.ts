@@ -6,6 +6,14 @@ import type {
 } from "../domain/route.ts";
 import { calculateStraightLineDistanceKm } from "./distance.ts";
 
+export type RouteComparison = {
+  straightLineDistanceKm: number;
+  hasRoadRoute: boolean;
+  roadDistanceKm?: number;
+  roadDurationMinutes?: number;
+  distanceDifferenceKm?: number;
+};
+
 export function locationToRouteCoordinate(
   location: Pick<PampangaLocation, "longitude" | "latitude">,
 ): RouteCoordinate {
@@ -42,5 +50,30 @@ export function selectBestRoutePreview(
   return {
     ...fallback,
     errorMessage: routeLookup.errorMessage,
+  };
+}
+
+export function buildRouteComparison(
+  straightLineRoute: RouteResult,
+  activeRoute: RouteResult,
+): RouteComparison {
+  const hasRoadRoute =
+    activeRoute.provider === "osrm_demo" && !activeRoute.isFallback;
+
+  if (!hasRoadRoute) {
+    return {
+      straightLineDistanceKm: straightLineRoute.distanceKm,
+      hasRoadRoute: false,
+    };
+  }
+
+  return {
+    straightLineDistanceKm: straightLineRoute.distanceKm,
+    hasRoadRoute: true,
+    roadDistanceKm: activeRoute.distanceKm,
+    roadDurationMinutes: activeRoute.durationMinutes,
+    distanceDifferenceKm: Number(
+      (activeRoute.distanceKm - straightLineRoute.distanceKm).toFixed(1),
+    ),
   };
 }

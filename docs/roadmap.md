@@ -64,7 +64,7 @@ Outcome: The app now supports local session booking intake, driver assignment, a
 
 ## Phase 4: Routing and Estimates
 
-Status: In progress. Phase 4A road route preview is complete.
+Status: In progress. Phase 4A road route preview and Phase 4B route UX hardening are complete.
 
 Milestones:
 
@@ -72,9 +72,12 @@ Milestones:
 - Add an optional OSRM demo road-route lookup triggered by the user. Complete in Phase 4A.
 - Show the difference between approximate straight-line distance and demo road-route distance/duration. Complete in Phase 4A.
 - Handle missing or unavailable OSRM routes without breaking the map. Complete in Phase 4A.
+- Add selected-booking route review controls on the map page. Complete in Phase 4B.
+- Add reset/retry route controls and a compact route comparison panel. Complete in Phase 4B.
+- Add API/query validation, timeout handling, and route UX screenshot evidence. Complete in Phase 4B.
 - Calculate service-specific estimate details before booking confirmation. Planned.
 - Decide whether road-route distance should influence pricing, and label it clearly if added. Planned.
-- Add route polish such as clearer selected booking context, route reset controls, and better error states. Planned for Phase 4B.
+- Add route polish such as map bounds fitting, richer fallback provider options, and persisted route history. Planned for a later Phase 4 pass.
 
 Outcome: The map now has useful route context without pretending to provide production-grade routing. Straight-line distance remains the price estimate basis, and OSRM is treated as optional demo infrastructure.
 

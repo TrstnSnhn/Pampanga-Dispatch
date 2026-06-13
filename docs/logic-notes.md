@@ -1,6 +1,6 @@
 # Logic Notes
 
-Phase 3A added practical local booking and dispatch behavior for the modern Pampanga Dispatch app. Phase 3B extends it with session-only lifecycle management. Phase 4A adds an optional demo road-route preview while keeping the straight-line fallback. The logic is intentionally small, deterministic, and honest about its limits.
+Phase 3A added practical local booking and dispatch behavior for the modern Pampanga Dispatch app. Phase 3B extends it with session-only lifecycle management. Phase 4A adds an optional demo road-route preview while keeping the straight-line fallback. Phase 4B hardens that route flow with reset/retry controls, route comparison, and timeout handling. The logic is intentionally small, deterministic, and honest about its limits.
 
 ## Local Demo State
 
@@ -25,6 +25,9 @@ Phase 3A added practical local booking and dispatch behavior for the modern Pamp
 - OSRM demo routing is requested only when the user clicks `Calculate road route`.
 - OSRM request and response geometry coordinates use `[longitude, latitude]` order.
 - OSRM road distance and duration are labeled as demo references.
+- Route selection and route preview state are local UI state only.
+- Selecting a different booking resets the map back to the straight-line preview.
+- Resetting a route returns to the straight-line fallback without changing booking data.
 - If OSRM is unavailable or returns malformed data, the app keeps showing the straight-line fallback.
 - See [routing-notes.md](routing-notes.md) for the fuller routing explanation.
 

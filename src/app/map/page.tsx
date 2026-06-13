@@ -1,15 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ChangeEvent } from "react";
 import { PageHeader } from "@/components/page-header";
 import { StatusPill } from "@/components/status-pill";
 import { pampangaLocations, getLocationById } from "@/data/pampanga-locations";
+import type { Booking } from "@/domain/booking";
 import type { RouteLookupResult, RouteResult } from "@/domain/route";
 import { useDispatchDemo } from "@/features/dispatch/dispatch-demo-provider";
 import { BookingMapPreview } from "@/features/map/booking-map-preview";
 import { LocationMarkerList } from "@/features/map/location-marker-list";
 import { PampangaMap } from "@/features/map/pampanga-map";
 import {
+  buildRouteComparison,
   buildStraightLineRouteResult,
   selectBestRoutePreview,
 } from "@/lib/route-preview";
@@ -24,19 +26,38 @@ async function getRouteErrorMessage(response: Response) {
   }
 }
 
+function findDefaultPreviewBooking(bookings: Booking[]) {
+  return (
+    bookings.find((booking) =>
+      ["assigned", "picked_up", "in_transit"].includes(booking.status),
+    ) ??
+    bookings.find((booking) => booking.status === "pending") ??
+    bookings[0]
+  );
+}
+
+function bookingRouteLabel(booking: Booking) {
+  const pickup = getLocationById(booking.pickupLocationId)?.name ?? "Unknown";
+  const dropOff = getLocationById(booking.dropOffLocationId)?.name ?? "Unknown";
+
+  return `${booking.id} - ${pickup} to ${dropOff}`;
+}
+
 export default function MapPage() {
   const { bookings } = useDispatchDemo();
+  const [selectedBookingId, setSelectedBookingId] = useState<string>();
   const [routePreviewState, setRoutePreviewState] = useState<{
     bookingId: string;
     route: RouteResult;
   }>();
   const [isRouteLoading, setIsRouteLoading] = useState(false);
+  const defaultPreviewBooking = useMemo(
+    () => findDefaultPreviewBooking(bookings),
+    [bookings],
+  );
   const previewBooking =
-    bookings.find((booking) =>
-      ["assigned", "picked_up", "in_transit"].includes(booking.status),
-    ) ??
-    bookings.find((booking) => booking.status === "pending") ??
-    bookings[0];
+    bookings.find((booking) => booking.id === selectedBookingId) ??
+    defaultPreviewBooking;
 
   const pickupLocation = previewBooking
     ? getLocationById(previewBooking.pickupLocationId)
@@ -55,6 +76,23 @@ export default function MapPage() {
     routePreviewState?.bookingId === previewBooking?.id
       ? routePreviewState.route
       : fallbackRoutePreview;
+  const routeComparison =
+    fallbackRoutePreview && activeRoutePreview
+      ? buildRouteComparison(fallbackRoutePreview, activeRoutePreview)
+      : undefined;
+
+  function handleBookingSelectionChange(
+    event: ChangeEvent<HTMLSelectElement>,
+  ) {
+    setSelectedBookingId(event.target.value);
+    setRoutePreviewState(undefined);
+    setIsRouteLoading(false);
+  }
+
+  function handleResetRoutePreview() {
+    setRoutePreviewState(undefined);
+    setIsRouteLoading(false);
+  }
 
   async function handleCalculateRoadRoute() {
     if (
@@ -131,8 +169,43 @@ export default function MapPage() {
         }
       />
 
-      {previewBooking && pickupLocation && dropOffLocation && activeRoutePreview ? (
+      {previewBooking &&
+      pickupLocation &&
+      dropOffLocation &&
+      activeRoutePreview &&
+      fallbackRoutePreview &&
+      routeComparison ? (
         <>
+          <section className="pd-card-flat rounded-2xl p-4">
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,380px)] lg:items-end">
+              <div>
+                <p className="text-sm font-semibold text-[var(--foreground)]">
+                  Route review booking
+                </p>
+                <p className="mt-1 text-sm leading-6 text-[var(--muted-foreground)]">
+                  The map defaults to active bookings first, then pending
+                  bookings. Selecting another booking resets the route preview.
+                </p>
+              </div>
+              <label className="block">
+                <span className="text-xs font-medium text-[var(--muted-foreground)]">
+                  Selected booking
+                </span>
+                <select
+                  value={previewBooking.id}
+                  onChange={handleBookingSelectionChange}
+                  className="mt-2 min-h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm font-medium text-[var(--foreground)] shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+                >
+                  {bookings.map((booking) => (
+                    <option key={booking.id} value={booking.id}>
+                      {bookingRouteLabel(booking)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </section>
+
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
             <PampangaMap
               locations={pampangaLocations}
@@ -149,8 +222,11 @@ export default function MapPage() {
             pickupLocation={pickupLocation}
             dropOffLocation={dropOffLocation}
             routePreview={activeRoutePreview}
+            straightLineRoute={fallbackRoutePreview}
+            routeComparison={routeComparison}
             isRouteLoading={isRouteLoading}
             onCalculateRoute={handleCalculateRoadRoute}
+            onResetRoute={handleResetRoutePreview}
           />
         </>
       ) : (

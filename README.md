@@ -22,7 +22,7 @@ Phase 0 legacy preservation and documentation are complete. Phase 1 scaffolded t
 
 Phase 3A adds local-only booking creation, approximate straight-line distance estimates, service-based pricing estimates, deterministic driver suggestions, and session-only dispatch assignment. Phase 3B extends that into a complete local lifecycle: pending, assigned, picked up, in transit, completed, and cancelled where valid. Completing or cancelling an assigned booking releases the driver back to available.
 
-Phase 4A adds an optional OSRM demo road-route preview on the map. The app still defaults to the straight-line visual preview and keeps booking prices based on approximate straight-line distance unless a future phase changes that explicitly. No database connection has been added, no authentication is enabled, and local demo state resets on refresh.
+Phase 4A adds an optional OSRM demo road-route preview on the map. Phase 4B hardens that route experience with a clearer selected-booking panel, route comparison, reset/retry controls, timeout handling, and screenshot QA evidence. The app still defaults to the straight-line visual preview and keeps booking prices based on approximate straight-line distance unless a future phase changes that explicitly. No database connection has been added, no authentication is enabled, and local demo state resets on refresh.
 
 ## Local Development
 
@@ -34,6 +34,7 @@ npm test
 
 See [docs/logic-notes.md](docs/logic-notes.md) for the current local booking and dispatch assumptions.
 See [docs/routing-notes.md](docs/routing-notes.md) for the current straight-line and optional OSRM routing assumptions.
+See [docs/qa/phase-4b-route-review](docs/qa/phase-4b-route-review) for route-view QA screenshots and review notes.
 
 ## Roadmap
 

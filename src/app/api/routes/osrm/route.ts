@@ -1,44 +1,17 @@
 import { NextResponse } from "next/server";
-import type { RouteCoordinate } from "@/domain/route";
-import { fetchOsrmRoute } from "@/lib/osrm";
+import { fetchOsrmRoute, parseOsrmRouteQuery } from "@/lib/osrm";
 
 export const dynamic = "force-dynamic";
 
-function parseCoordinateParam(value: string | null) {
-  if (!value) {
-    return undefined;
-  }
-
-  const numberValue = Number(value);
-
-  return Number.isFinite(numberValue) ? numberValue : undefined;
-}
-
-function isValidLongitude(value: number | undefined): value is number {
-  return value !== undefined && value >= -180 && value <= 180;
-}
-
-function isValidLatitude(value: number | undefined): value is number {
-  return value !== undefined && value >= -90 && value <= 90;
-}
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const pickupLongitude = parseCoordinateParam(searchParams.get("pickupLng"));
-  const pickupLatitude = parseCoordinateParam(searchParams.get("pickupLat"));
-  const dropOffLongitude = parseCoordinateParam(searchParams.get("dropoffLng"));
-  const dropOffLatitude = parseCoordinateParam(searchParams.get("dropoffLat"));
+  const query = parseOsrmRouteQuery(searchParams);
 
-  if (
-    !isValidLongitude(pickupLongitude) ||
-    !isValidLatitude(pickupLatitude) ||
-    !isValidLongitude(dropOffLongitude) ||
-    !isValidLatitude(dropOffLatitude)
-  ) {
+  if (!query.ok) {
     return NextResponse.json(
-      { errorMessage: "Invalid pickup or drop-off coordinates." },
+      { errorMessage: query.errorMessage },
       {
-        status: 400,
+        status: query.status,
         headers: {
           "Cache-Control": "no-store",
         },
@@ -46,9 +19,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const pickup: RouteCoordinate = [pickupLongitude, pickupLatitude];
-  const dropOff: RouteCoordinate = [dropOffLongitude, dropOffLatitude];
-  const result = await fetchOsrmRoute(pickup, dropOff);
+  const result = await fetchOsrmRoute(query.pickup, query.dropOff);
 
   if (!result.ok) {
     return NextResponse.json(

@@ -1,6 +1,6 @@
 # Routing Notes
 
-Phase 4A adds route preview foundations for Pampanga Dispatch. The app now separates the always-available straight-line preview from an optional OSRM demo road-route lookup.
+Phase 4A adds route preview foundations for Pampanga Dispatch. Phase 4B hardens the reviewer-facing route experience. The app now separates the always-available straight-line preview from an optional OSRM demo road-route lookup, with route comparison and reset controls.
 
 ## Straight-Line Preview
 
@@ -13,11 +13,35 @@ Phase 4A adds route preview foundations for Pampanga Dispatch. The app now separ
 ## Optional OSRM Demo Route
 
 - The map page includes a `Calculate road route` button.
+- After a road route loads, the same control becomes a recalculation action.
+- If a route lookup fails, the action becomes a retry.
+- `Reset to visual preview` returns the panel and map line to the straight-line fallback.
 - Clicking the button calls a local Next route handler at `/api/routes/osrm`.
 - The route handler calls the public OSRM demo server with the driving profile.
 - OSRM output is shown as a solid route line with road distance and estimated duration.
 - The app does not call OSRM during build or initial page load.
 - The app continues to work if OSRM is unavailable.
+
+## Booking Selection
+
+- The map page defaults to active bookings first, then pending bookings, then the first sample booking.
+- A compact selector lets reviewers choose another local booking route preview.
+- Selecting a different booking resets the route preview so road-route state is not reused across bookings.
+- Selection is session-only UI state and is not persisted.
+
+## Route Comparison
+
+- The route panel shows straight-line distance, booking price estimate, active route mode, route provider, OSRM road distance, OSRM duration, and distance difference when a road route is available.
+- Booking prices remain tied to the existing straight-line estimate.
+- OSRM road distance is a reference value and does not automatically change price.
+
+## API and Failure Handling
+
+- The OSRM route handler validates missing query parameters separately from invalid coordinate ranges.
+- Coordinates are validated before any OSRM request is attempted.
+- OSRM fetches use a timeout so the UI can return to a fallback state instead of waiting indefinitely.
+- Malformed OSRM responses return typed errors and do not crash the map page.
+- Tests use mocked responses and do not call the live OSRM server.
 
 ## Coordinate Order
 
@@ -29,7 +53,7 @@ This is different from the way locations are often written for humans as latitud
 
 - Booking estimates still use approximate straight-line distance.
 - OSRM road distance is shown as a separate reference value.
-- Phase 4A does not silently recalculate or replace booking prices after a route lookup.
+- Phase 4B does not silently recalculate or replace booking prices after a route lookup.
 - Future phases can add a road-route price estimate, but it should be labeled separately and documented.
 
 ## Why OSRM Is Demo-Only
@@ -45,6 +69,7 @@ The public OSRM server is useful for demonstration, but it is not project infras
 - No fallback provider beyond the straight-line preview.
 - No database storage for route results.
 - Public OSRM availability can vary.
+- The map route line is not fitted to bounds after selecting a booking or calculating a road route.
 
 ## Future Options
 
