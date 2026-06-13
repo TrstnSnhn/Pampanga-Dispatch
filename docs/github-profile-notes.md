@@ -4,6 +4,12 @@
 
 A Pampanga-based delivery dispatch and route preview app modernized from a Java OOP CLI project.
 
+## Public Links
+
+- Repository: <https://github.com/TrstnSnhn/Pampanga-Dispatch>
+- Live demo: <https://pampanga-dispatch.vercel.app>
+- Vercel deployment page: <https://vercel.com/trstnsnhns-projects/pampanga-dispatch/8E5qKWRgvzX4i66TV27xw6J7Up8V>
+
 ## Suggested GitHub Topics
 
 - `nextjs`
@@ -51,7 +57,7 @@ Modernized a Java OOP CLI logistics final project into a Pampanga-focused dispat
 - Confirm `npm test`, `npm run lint`, and `npm run build` pass locally.
 - Confirm no secrets or `.env` files are committed.
 - Do not select a license until the project owner chooses one.
-- Add a Vercel deployment URL to the README after deployment succeeds.
+- Confirm the README live demo URL remains current after future deployments.
 
 ## Suggested Commit Summary for Portfolio
 

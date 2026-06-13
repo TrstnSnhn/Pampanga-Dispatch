@@ -4,6 +4,12 @@
 
 Vercel is the recommended deployment target for the current Next.js app.
 
+Current deployment:
+
+- Production app: <https://pampanga-dispatch.vercel.app>
+- Vercel deployment page: <https://vercel.com/trstnsnhns-projects/pampanga-dispatch/8E5qKWRgvzX4i66TV27xw6J7Up8V>
+- Public GitHub repository: <https://github.com/TrstnSnhn/Pampanga-Dispatch>
+
 The project uses the Next.js App Router and includes a dynamic API route at:
 
 ```text
@@ -56,4 +62,13 @@ The public OSRM demo server is not production infrastructure. A production versi
 - No traffic model.
 - No multi-stop optimization.
 - No production-grade routing provider.
-- No deployment URL has been recorded in the repository yet.
+
+## Phase 5C Production Smoke
+
+Production smoke testing was recorded in:
+
+```text
+docs/qa/phase-5c-production-smoke/README.md
+```
+
+The deployed routes loaded successfully, the map straight-line preview loaded, the optional OSRM demo road route succeeded during review, reset returned to visual preview, and the session-only booking lifecycle reset after refresh as expected.

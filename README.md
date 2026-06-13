@@ -4,6 +4,11 @@ Pampanga Dispatch is a Pampanga-based delivery dispatch and route preview app mo
 
 This is not a production logistics platform. State is session-only, there is no database yet, and OSRM road routing is optional demo infrastructure with a straight-line fallback.
 
+## Live Demo
+
+- Production app: <https://pampanga-dispatch.vercel.app>
+- Public repository: <https://github.com/TrstnSnhn/Pampanga-Dispatch>
+
 ## Screenshots
 
 | Dashboard | Bookings | Dispatch |
@@ -16,7 +21,7 @@ This is not a production logistics platform. State is session-only, there is no 
 
 ## Demo Status
 
-- Local demo app.
+- Public Vercel deployment of a local demo app.
 - Session-only booking, driver, dispatch, and route preview state.
 - No database, authentication, or persistence yet.
 - Straight-line route preview is the default.
@@ -116,11 +121,11 @@ A practical reviewer flow is documented in [docs/demo-script.md](docs/demo-scrip
 ## Roadmap
 
 - Persist bookings, assignments, and route previews.
-- Add deployment and hosted demo setup.
+- Add deployment monitoring and post-deploy QA notes.
 - Add route caching and clearer routing provider boundaries.
 - Evaluate self-hosted OSRM or a production-grade route provider.
 - Add accessibility audit and keyboard-flow review.
-- Expand portfolio documentation with deployment notes.
+- Expand portfolio documentation as the app gains persisted workflows.
 
 See [docs/roadmap.md](docs/roadmap.md) for the phased modernization roadmap.
 
