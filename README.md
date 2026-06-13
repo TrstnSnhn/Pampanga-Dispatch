@@ -128,6 +128,7 @@ See [docs/roadmap.md](docs/roadmap.md) for the phased modernization roadmap.
 
 - Case study: [docs/portfolio-case-study.md](docs/portfolio-case-study.md)
 - Architecture: [docs/architecture.md](docs/architecture.md)
+- Deployment notes: [docs/deployment-notes.md](docs/deployment-notes.md)
 - Demo script: [docs/demo-script.md](docs/demo-script.md)
 - GitHub presentation notes: [docs/github-profile-notes.md](docs/github-profile-notes.md)
 - QA evidence: [docs/qa](docs/qa)

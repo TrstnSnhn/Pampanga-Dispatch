@@ -120,4 +120,4 @@ The legacy Java code is not rewritten in the current phases.
 - No route caching.
 - No traffic or road-closure model.
 - No multi-stop optimization.
-- No deployment configuration yet.
+- No custom deployment configuration yet. Vercel auto-detection is expected to handle the current Next.js app.

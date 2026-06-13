@@ -30,6 +30,29 @@ Modernized a Java OOP CLI logistics final project into a Pampanga-focused dispat
 - Hardened route fallback behavior so OSRM failures do not break the app.
 - Added screenshot QA evidence, logic notes, routing notes, architecture docs, and a reviewer demo script.
 
+## Suggested Demo Flow
+
+1. Open the dashboard and explain that the app is a local portfolio demo.
+2. Create a local booking from the Bookings page.
+3. Assign a suggested driver from the Dispatch page.
+4. Move the booking through the lifecycle.
+5. Open the Map page and review the default straight-line preview.
+6. Calculate the optional OSRM demo road route.
+7. Reset back to the visual preview.
+8. Call out that state is session-only and OSRM is demo-only.
+
+## Suggested Public Repo Checklist
+
+- Add a concise GitHub repository description.
+- Add the suggested topics above.
+- Confirm README screenshots render on GitHub.
+- Confirm `legacy/java-cli` is preserved.
+- Confirm `.agents/`, `.codex/`, and `skills-lock.json` are ignored.
+- Confirm `npm test`, `npm run lint`, and `npm run build` pass locally.
+- Confirm no secrets or `.env` files are committed.
+- Do not select a license until the project owner chooses one.
+- Add a Vercel deployment URL to the README after deployment succeeds.
+
 ## Suggested Commit Summary for Portfolio
 
 Modernized legacy Java logistics CLI into a typed Next.js dispatch demo with local booking state, driver assignment, Pampanga map routing previews, OSRM fallback handling, tests, and portfolio-ready documentation.
