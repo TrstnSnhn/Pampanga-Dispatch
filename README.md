@@ -140,4 +140,4 @@ See [docs/roadmap.md](docs/roadmap.md) for the phased modernization roadmap.
 
 ## License
 
-No license has been selected yet.
+This project is released under the [MIT License](LICENSE).

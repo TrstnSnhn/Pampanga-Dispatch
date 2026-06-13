@@ -56,7 +56,7 @@ Modernized a Java OOP CLI logistics final project into a Pampanga-focused dispat
 - Confirm `.agents/`, `.codex/`, and `skills-lock.json` are ignored.
 - Confirm `npm test`, `npm run lint`, and `npm run build` pass locally.
 - Confirm no secrets or `.env` files are committed.
-- Do not select a license until the project owner chooses one.
+- Confirm the repository displays the MIT License.
 - Confirm the README live demo URL remains current after future deployments.
 
 ## Suggested Commit Summary for Portfolio
