@@ -1,3 +1,5 @@
+import { Database, MapPinned, Route, Settings2 } from "lucide-react";
+import { MetricCard } from "@/components/metric-card";
 import { PageHeader } from "@/components/page-header";
 import { StatusPill } from "@/components/status-pill";
 
@@ -8,6 +10,7 @@ const settings = [
     badge: "Configured",
     detail: "Initial sample data is limited to Pampanga cities and municipalities.",
     tone: "success" as const,
+    icon: MapPinned,
   },
   {
     label: "Data source",
@@ -15,6 +18,7 @@ const settings = [
     badge: "Local",
     detail: "Bookings, drivers, and locations are stored in TypeScript modules.",
     tone: "info" as const,
+    icon: Settings2,
   },
   {
     label: "Routing",
@@ -22,6 +26,7 @@ const settings = [
     badge: "Later phase",
     detail: "Route drawing and estimates are planned for a later phase.",
     tone: "warning" as const,
+    icon: Route,
   },
   {
     label: "Database",
@@ -29,6 +34,7 @@ const settings = [
     badge: "Later phase",
     detail: "Persistence will be decided after the core app model is stable.",
     tone: "warning" as const,
+    icon: Database,
   },
 ];
 
@@ -37,25 +43,65 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Settings"
-        description="Current project configuration placeholders for the Phase 1 foundation."
+        eyebrow="Project configuration"
+        meta="Scope guardrails"
+        description="Current project status for service area, sample data, routing, and persistence."
       />
+
+      <section className="grid gap-3 md:grid-cols-4">
+        <MetricCard
+          label="Service area"
+          value="1"
+          note="Pampanga province"
+          icon={MapPinned}
+          tone="green"
+        />
+        <MetricCard
+          label="Data mode"
+          value="Local"
+          note="TypeScript sample data"
+          icon={Settings2}
+          tone="blue"
+        />
+        <MetricCard
+          label="Routing"
+          value="Off"
+          note="No OSRM integration"
+          icon={Route}
+          tone="amber"
+        />
+        <MetricCard
+          label="Database"
+          value="Off"
+          note="No persistence layer"
+          icon={Database}
+          tone="clay"
+        />
+      </section>
 
       <section className="grid gap-3 md:grid-cols-2">
         {settings.map((setting) => (
           <article
             key={setting.label}
-            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4"
+            className="pd-card-flat rounded-2xl p-4"
           >
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
-                  {setting.label}
-                </p>
-                <p className="mt-2 text-base font-semibold text-[var(--foreground)]">
-                  {setting.value}
-                </p>
+              <div className="flex items-start gap-3">
+                <span className="grid size-10 place-items-center rounded-xl bg-[var(--muted)] text-[var(--foreground)]">
+                  <setting.icon className="size-4" strokeWidth={1.8} />
+                </span>
+                <div>
+                  <p className="text-xs font-medium text-[var(--muted-foreground)]">
+                    {setting.label}
+                  </p>
+                  <p className="mt-1 text-base font-semibold text-[var(--foreground)]">
+                    {setting.value}
+                  </p>
+                </div>
               </div>
-              <StatusPill tone={setting.tone}>{setting.badge}</StatusPill>
+              <StatusPill tone={setting.tone} dot>
+                {setting.badge}
+              </StatusPill>
             </div>
             <p className="mt-4 text-sm leading-6 text-[var(--muted-foreground)]">
               {setting.detail}

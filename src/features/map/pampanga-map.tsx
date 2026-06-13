@@ -44,7 +44,7 @@ function markerRole(
 
 function markerClasses(role: ReturnType<typeof markerRole>) {
   return cn(
-    "grid size-4 place-items-center rounded-full border-2 border-[var(--surface)] shadow-sm",
+    "grid size-5 place-items-center rounded-full border-2 border-[var(--surface)] shadow-[0_8px_18px_oklch(0.2_0.03_100/0.22)]",
     role === "pickup" && "bg-[var(--success-foreground)]",
     role === "drop-off" && "bg-[var(--info-foreground)]",
     role === "service-area" && "bg-[var(--accent)]",
@@ -63,14 +63,34 @@ export function PampangaMap({
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)]">
+    <div className="pd-card relative overflow-hidden rounded-3xl">
+      <div className="absolute left-4 top-4 z-10 max-w-[calc(100%-2rem)] rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 shadow-[0_16px_42px_var(--shadow-color)]">
+        <p className="text-sm font-semibold text-[var(--foreground)]">
+          Pampanga service area
+        </p>
+        <div className="mt-2 flex flex-wrap gap-2 text-xs text-[var(--muted-foreground)]">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-[var(--accent)]" />
+            Location marker
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-[var(--success-foreground)]" />
+            Pickup
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-[var(--info-foreground)]" />
+            Drop-off
+          </span>
+        </div>
+      </div>
+
       <Map
         theme="light"
         center={pampangaCenter}
         zoom={9.15}
         minZoom={8}
         maxZoom={14}
-        className="h-[560px] min-h-[420px] w-full"
+        className="h-[640px] min-h-[460px] w-full"
       >
         <MapControls
           position="top-right"
@@ -105,11 +125,14 @@ export function PampangaMap({
               </MarkerContent>
               <MarkerLabel
                 position="bottom"
-                className="rounded bg-[var(--surface)] px-1.5 py-0.5 text-[9px] text-[var(--foreground)] shadow-sm"
+                className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 text-[9px] text-[var(--foreground)] shadow-sm"
               >
                 {location.name}
               </MarkerLabel>
-              <MarkerPopup closeButton className="w-56 border-[var(--border)]">
+              <MarkerPopup
+                closeButton
+                className="w-56 border-[var(--border)] bg-[var(--surface)]"
+              >
                 <div className="pr-3">
                   <p className="text-sm font-semibold text-[var(--foreground)]">
                     {location.name}
@@ -135,7 +158,7 @@ export function PampangaMap({
         })}
       </Map>
 
-      <div className="absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs shadow-sm">
+      <div className="absolute bottom-4 left-4 max-w-[calc(100%-2rem)] rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-xs shadow-[0_16px_42px_var(--shadow-color)]">
         <p className="font-semibold text-[var(--foreground)]">
           {previewBooking.id}: visual pickup to drop-off preview only
         </p>

@@ -1,4 +1,5 @@
 import { PageHeader } from "@/components/page-header";
+import { ServiceBadge } from "@/components/service-badge";
 import { StatusPill } from "@/components/status-pill";
 import { sampleBookings } from "@/data/sample-bookings";
 import { getDriverName } from "@/data/sample-drivers";
@@ -7,7 +8,6 @@ import {
   dispatchStatusLabels,
   type DispatchStatus,
 } from "@/domain/dispatch-status";
-import { serviceTypeLabels } from "@/domain/service-type";
 import { formatPeso } from "@/lib/format";
 
 const statusTone: Record<
@@ -26,22 +26,34 @@ export default function BookingsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Bookings"
-        description="Read-only sample bookings for the Phase 1 scaffold. Create, edit, and cancellation flows will come later."
+        eyebrow="Booking review"
+        meta={`${sampleBookings.length} sample records`}
+        description="Read-only ride, parcel, and food delivery records using local TypeScript sample data."
       />
 
-      <section className="overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)]">
+      <section className="pd-card overflow-hidden rounded-2xl">
+        <div className="flex flex-col gap-3 border-b border-[var(--border)] bg-[var(--surface-raised)] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-[var(--foreground)]">
+              Booking ledger
+            </h2>
+            <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+              No create or edit flow yet. These rows are sample records.
+            </p>
+          </div>
+          <StatusPill tone="neutral">{sampleBookings.length} total</StatusPill>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[820px] border-separate border-spacing-0 text-left text-sm">
-            <thead className="bg-[var(--muted)] text-xs uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
+            <thead className="bg-[var(--surface)] text-xs text-[var(--muted-foreground)]">
               <tr>
-                <th className="px-4 py-3 font-semibold">Booking ID</th>
+                <th className="px-4 py-3 font-semibold">Booking</th>
                 <th className="px-4 py-3 font-semibold">Service</th>
-                <th className="px-4 py-3 font-semibold">Pickup</th>
-                <th className="px-4 py-3 font-semibold">Drop-off</th>
+                <th className="px-4 py-3 font-semibold">Route points</th>
                 <th className="px-4 py-3 font-semibold">Status</th>
                 <th className="px-4 py-3 font-semibold">Driver</th>
                 <th className="px-4 py-3 text-right font-semibold">
-                  Price estimate
+                  Estimate
                 </th>
               </tr>
             </thead>
@@ -49,26 +61,46 @@ export default function BookingsPage() {
               {sampleBookings.map((booking) => (
                 <tr
                   key={booking.id}
-                  className="border-b border-[var(--border)] last:border-b-0"
+                  className="transition-colors hover:bg-[var(--surface-raised)]"
                 >
-                  <td className="border-t border-[var(--border)] px-4 py-4 font-medium text-[var(--foreground)]">
-                    {booking.id}
-                  </td>
-                  <td className="border-t border-[var(--border)] px-4 py-4 text-[var(--muted-foreground)]">
-                    {serviceTypeLabels[booking.serviceType]}
-                  </td>
-                  <td className="border-t border-[var(--border)] px-4 py-4 text-[var(--foreground)]">
-                    {getLocationName(booking.pickupLocationId)}
-                  </td>
-                  <td className="border-t border-[var(--border)] px-4 py-4 text-[var(--foreground)]">
-                    {getLocationName(booking.dropOffLocationId)}
+                  <td className="border-t border-[var(--border)] px-4 py-4">
+                    <p className="font-semibold text-[var(--foreground)]">
+                      {booking.id}
+                    </p>
+                    <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                      Local sample record
+                    </p>
                   </td>
                   <td className="border-t border-[var(--border)] px-4 py-4">
-                    <StatusPill tone={statusTone[booking.status]}>
+                    <ServiceBadge serviceType={booking.serviceType} />
+                  </td>
+                  <td className="border-t border-[var(--border)] px-4 py-4 text-[var(--foreground)]">
+                    <div className="grid gap-2">
+                      <div>
+                        <p className="text-xs font-medium text-[var(--muted-foreground)]">
+                          Pickup
+                        </p>
+                        <p className="font-medium">
+                          {getLocationName(booking.pickupLocationId)}
+                        </p>
+                      </div>
+                      <div className="h-px w-10 bg-[var(--border)]" />
+                      <div>
+                        <p className="text-xs font-medium text-[var(--muted-foreground)]">
+                          Drop-off
+                        </p>
+                        <p className="font-medium">
+                          {getLocationName(booking.dropOffLocationId)}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="border-t border-[var(--border)] px-4 py-4">
+                    <StatusPill tone={statusTone[booking.status]} dot>
                       {dispatchStatusLabels[booking.status]}
                     </StatusPill>
                   </td>
-                  <td className="border-t border-[var(--border)] px-4 py-4 text-[var(--muted-foreground)]">
+                  <td className="border-t border-[var(--border)] px-4 py-4 font-medium text-[var(--foreground)]">
                     {getDriverName(booking.driverId)}
                   </td>
                   <td className="border-t border-[var(--border)] px-4 py-4 text-right font-medium text-[var(--foreground)]">

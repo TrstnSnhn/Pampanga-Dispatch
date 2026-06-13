@@ -1,4 +1,5 @@
 import { PageHeader } from "@/components/page-header";
+import { StatusPill } from "@/components/status-pill";
 import { pampangaLocations, getLocationById } from "@/data/pampanga-locations";
 import { sampleBookings } from "@/data/sample-bookings";
 import { BookingMapPreview } from "@/features/map/booking-map-preview";
@@ -21,12 +22,19 @@ export default function MapPage() {
     <div className="space-y-6">
       <PageHeader
         title="Pampanga Map"
-        description="A Pampanga-focused service area view with city and municipality markers. Routing is not connected yet."
+        eyebrow="Map workspace"
+        meta={`${pampangaLocations.length} Pampanga markers`}
+        description="A Pampanga-focused service-area view with local markers and an honest sample booking preview."
+        actions={
+          <StatusPill tone="warning" dot>
+            No road routing yet
+          </StatusPill>
+        }
       />
 
       {previewBooking && pickupLocation && dropOffLocation ? (
         <>
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
             <PampangaMap
               locations={pampangaLocations}
               previewBooking={previewBooking}

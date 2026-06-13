@@ -1,8 +1,9 @@
+import { MapPin, Route } from "lucide-react";
 import { StatusPill } from "@/components/status-pill";
+import { ServiceBadge } from "@/components/service-badge";
 import type { Booking } from "@/domain/booking";
 import { dispatchStatusLabels } from "@/domain/dispatch-status";
 import type { PampangaLocation } from "@/domain/location";
-import { serviceTypeLabels } from "@/domain/service-type";
 import { formatPeso } from "@/lib/format";
 
 type BookingMapPreviewProps = {
@@ -21,38 +22,41 @@ export function BookingMapPreview({
   dropOffLocation,
 }: BookingMapPreviewProps) {
   return (
-    <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
+    <section className="pd-card-flat rounded-2xl p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
+          <p className="text-sm font-semibold text-[var(--foreground)]">
             Booking preview
           </p>
-          <h2 className="mt-2 text-base font-semibold text-[var(--foreground)]">
+          <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em] text-[var(--foreground)]">
             {booking.id}
           </h2>
         </div>
-        <StatusPill tone="warning">Visual preview only</StatusPill>
+        <StatusPill tone="warning" dot>
+          Visual preview only
+        </StatusPill>
       </div>
 
-      <dl className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div>
-          <dt className="text-xs font-medium uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
+      <dl className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-xl bg-[var(--surface-raised)] p-3">
+          <dt className="text-xs font-medium text-[var(--muted-foreground)]">
             Service
           </dt>
-          <dd className="mt-1 text-sm font-medium text-[var(--foreground)]">
-            {serviceTypeLabels[booking.serviceType]}
+          <dd className="mt-2">
+            <ServiceBadge serviceType={booking.serviceType} />
           </dd>
         </div>
-        <div>
-          <dt className="text-xs font-medium uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
+        <div className="rounded-xl bg-[var(--surface-raised)] p-3">
+          <dt className="text-xs font-medium text-[var(--muted-foreground)]">
             Status
           </dt>
           <dd className="mt-1 text-sm font-medium text-[var(--foreground)]">
             {dispatchStatusLabels[booking.status]}
           </dd>
         </div>
-        <div>
-          <dt className="text-xs font-medium uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
+        <div className="rounded-xl bg-[var(--surface-raised)] p-3">
+          <dt className="flex items-center gap-1.5 text-xs font-medium text-[var(--muted-foreground)]">
+            <MapPin className="size-3.5" strokeWidth={1.8} />
             Pickup
           </dt>
           <dd className="mt-1 text-sm font-medium text-[var(--foreground)]">
@@ -62,8 +66,9 @@ export function BookingMapPreview({
             {coordinateText(pickupLocation)}
           </dd>
         </div>
-        <div>
-          <dt className="text-xs font-medium uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
+        <div className="rounded-xl bg-[var(--surface-raised)] p-3">
+          <dt className="flex items-center gap-1.5 text-xs font-medium text-[var(--muted-foreground)]">
+            <Route className="size-3.5" strokeWidth={1.8} />
             Drop-off
           </dt>
           <dd className="mt-1 text-sm font-medium text-[var(--foreground)]">

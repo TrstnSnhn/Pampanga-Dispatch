@@ -22,6 +22,8 @@ Phase 0 legacy preservation and documentation are complete. Phase 1 has scaffold
 
 Routing is not implemented yet. The current map preview does not calculate real road paths, and no database connection has been added.
 
+Phase 2B refines the visual design into a more portfolio-ready local logistics dashboard with stronger navigation, clearer data hierarchy, improved map panels, and documented design tokens.
+
 ## Local Development
 
 ```bash
