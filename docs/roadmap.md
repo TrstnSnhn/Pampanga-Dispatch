@@ -28,16 +28,18 @@ Outcome: A clean modern foundation is ready for product development, with local 
 
 ## Phase 2: Pampanga Map View
 
-Status: Planned.
+Status: In progress. Phase 2A map view foundation is complete.
 
 Milestones:
 
-- Integrate a Pampanga-centered map experience with mapcn.
-- Add pickup and drop-off marker interactions.
-- Define initial Pampanga city/municipality and landmark data.
-- Display selected route context in the UI.
+- Integrate a Pampanga-centered map experience with mapcn. Complete in Phase 2A.
+- Add Pampanga city and municipality markers from local sample data. Complete in Phase 2A.
+- Add a sample booking pickup/drop-off preview without real route calculation. Complete in Phase 2A.
+- Add pickup and drop-off marker interactions. Planned for a later Phase 2 pass.
+- Define expanded Pampanga landmark data. Planned.
+- Display selected route context in the UI. Planned.
 
-Outcome: Users can interact with a Pampanga-focused map instead of entering plain CLI text.
+Outcome: Users can now view a Pampanga-focused map with service-area markers and a visual booking preview. Real routing, OSRM integration, and route estimates are still planned for later phases.
 
 ## Phase 3: Booking and Dispatch Logic
 

@@ -163,3 +163,7 @@ export function getLocationName(locationId: PampangaLocation["id"]) {
     "Unknown location"
   );
 }
+
+export function getLocationById(locationId: PampangaLocation["id"]) {
+  return pampangaLocations.find((location) => location.id === locationId);
+}

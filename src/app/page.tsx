@@ -49,6 +49,11 @@ const quickLinks = [
     description: "Compare pending bookings with available drivers.",
   },
   {
+    href: "/map",
+    label: "Map",
+    description: "View Pampanga service-area markers and a booking preview.",
+  },
+  {
     href: "/settings",
     label: "Settings",
     description: "See the current project configuration placeholders.",

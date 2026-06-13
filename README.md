@@ -18,7 +18,9 @@ See [docs/legacy-inventory.md](docs/legacy-inventory.md) for the full inventory.
 
 ## Current Status
 
-Phase 0 legacy preservation and documentation are complete. Phase 1 has scaffolded the modern Next.js foundation with local sample data, read-only dashboard pages, and no map routing or database connection yet.
+Phase 0 legacy preservation and documentation are complete. Phase 1 has scaffolded the modern Next.js foundation with local sample data and read-only dashboard pages. Phase 2A adds a Pampanga map view with local markers and a sample booking pickup/drop-off preview.
+
+Routing is not implemented yet. The current map preview does not calculate real road paths, and no database connection has been added.
 
 ## Local Development
 
