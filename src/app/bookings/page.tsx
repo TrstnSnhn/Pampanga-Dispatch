@@ -1,14 +1,32 @@
+"use client";
+
+import { useMemo, useState, type FormEvent } from "react";
 import { PageHeader } from "@/components/page-header";
 import { ServiceBadge } from "@/components/service-badge";
 import { StatusPill } from "@/components/status-pill";
-import { sampleBookings } from "@/data/sample-bookings";
-import { getDriverName } from "@/data/sample-drivers";
-import { getLocationName } from "@/data/pampanga-locations";
+import {
+  getLocationById,
+  getLocationName,
+  pampangaLocations,
+} from "@/data/pampanga-locations";
 import {
   dispatchStatusLabels,
   type DispatchStatus,
 } from "@/domain/dispatch-status";
+import type { PampangaLocation } from "@/domain/location";
+import type { ServiceType } from "@/domain/service-type";
+import { serviceTypeLabels } from "@/domain/service-type";
+import { useDispatchDemo } from "@/features/dispatch/dispatch-demo-provider";
+import {
+  type BookingValidationErrors,
+  type CreateBookingInput,
+} from "@/lib/booking-factory";
+import {
+  calculateStraightLineDistanceKm,
+  formatApproxDistance,
+} from "@/lib/distance";
 import { formatPeso } from "@/lib/format";
+import { estimatePrice } from "@/lib/pricing";
 
 const statusTone: Record<
   DispatchStatus,
@@ -16,20 +34,271 @@ const statusTone: Record<
 > = {
   pending: "warning",
   assigned: "info",
-  "in-progress": "info",
+  picked_up: "info",
+  in_transit: "info",
   completed: "success",
   cancelled: "danger",
 };
 
+type BookingFormState = {
+  customerName: string;
+  serviceType: ServiceType;
+  pickupLocationId: string;
+  dropOffLocationId: string;
+  notes: string;
+};
+
+const initialFormState: BookingFormState = {
+  customerName: "",
+  serviceType: "ride",
+  pickupLocationId: "",
+  dropOffLocationId: "",
+  notes: "",
+};
+
+function driverName(
+  drivers: ReturnType<typeof useDispatchDemo>["drivers"],
+  driverId?: string,
+) {
+  if (!driverId) {
+    return "Unassigned";
+  }
+
+  return drivers.find((driver) => driver.id === driverId)?.name ?? "Unknown";
+}
+
+function estimateForForm(formState: BookingFormState) {
+  if (
+    !formState.pickupLocationId ||
+    !formState.dropOffLocationId ||
+    formState.pickupLocationId === formState.dropOffLocationId
+  ) {
+    return undefined;
+  }
+
+  const pickupLocation = getLocationById(
+    formState.pickupLocationId as PampangaLocation["id"],
+  );
+  const dropOffLocation = getLocationById(
+    formState.dropOffLocationId as PampangaLocation["id"],
+  );
+
+  if (!pickupLocation || !dropOffLocation) {
+    return undefined;
+  }
+
+  const distanceKm = calculateStraightLineDistanceKm(
+    pickupLocation,
+    dropOffLocation,
+  );
+
+  return {
+    distanceKm,
+    priceEstimate: estimatePrice(formState.serviceType, distanceKm),
+  };
+}
+
+function toBookingInput(formState: BookingFormState): CreateBookingInput {
+  return {
+    customerName: formState.customerName,
+    serviceType: formState.serviceType,
+    pickupLocationId: formState.pickupLocationId as PampangaLocation["id"],
+    dropOffLocationId: formState.dropOffLocationId as PampangaLocation["id"],
+    notes: formState.notes,
+  };
+}
+
 export default function BookingsPage() {
+  const { bookings, drivers, createBooking } = useDispatchDemo();
+  const [formState, setFormState] =
+    useState<BookingFormState>(initialFormState);
+  const [errors, setErrors] = useState<BookingValidationErrors>({});
+  const [createdBookingId, setCreatedBookingId] = useState<string | undefined>();
+  const estimate = useMemo(() => estimateForForm(formState), [formState]);
+
+  function updateField<Field extends keyof BookingFormState>(
+    field: Field,
+    value: BookingFormState[Field],
+  ) {
+    setFormState((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: undefined, route: undefined }));
+    setCreatedBookingId(undefined);
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const result = createBooking(toBookingInput(formState));
+
+    if (!result.ok) {
+      setErrors(result.errors);
+      setCreatedBookingId(undefined);
+      return;
+    }
+
+    setErrors({});
+    setCreatedBookingId(result.booking.id);
+    setFormState(initialFormState);
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Bookings"
-        eyebrow="Booking review"
-        meta={`${sampleBookings.length} sample records`}
-        description="Read-only ride, parcel, and food delivery records using local TypeScript sample data."
+        eyebrow="Local booking workflow"
+        meta={`${bookings.length} session records`}
+        description="Create and review local ride, parcel, and food delivery bookings. Data resets when the browser session refreshes."
       />
+
+      <section className="pd-card rounded-2xl p-4 sm:p-5">
+        <div className="flex flex-col gap-3 border-b border-[var(--border)] pb-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-[var(--foreground)]">
+              Create local booking
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--muted-foreground)]">
+              This creates a temporary client-side booking only. Distance is a
+              straight-line estimate, not road routing.
+            </p>
+          </div>
+          <StatusPill tone="warning" dot>
+            Session only
+          </StatusPill>
+        </div>
+
+        <form onSubmit={handleSubmit} className="mt-5 grid gap-4">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <label className="grid gap-2 text-sm font-medium text-[var(--foreground)]">
+              Customer name
+              <input
+                value={formState.customerName}
+                onChange={(event) =>
+                  updateField("customerName", event.target.value)
+                }
+                className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm font-normal outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[oklch(0.62_0.11_150/0.18)]"
+                placeholder="Juan Dela Cruz"
+              />
+              {errors.customerName ? (
+                <span className="text-xs font-medium text-[var(--danger-foreground)]">
+                  {errors.customerName}
+                </span>
+              ) : null}
+            </label>
+
+            <label className="grid gap-2 text-sm font-medium text-[var(--foreground)]">
+              Service type
+              <select
+                value={formState.serviceType}
+                onChange={(event) =>
+                  updateField("serviceType", event.target.value as ServiceType)
+                }
+                className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm font-normal outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[oklch(0.62_0.11_150/0.18)]"
+              >
+                {Object.entries(serviceTypeLabels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <label className="grid gap-2 text-sm font-medium text-[var(--foreground)]">
+              Pickup location
+              <select
+                value={formState.pickupLocationId}
+                onChange={(event) =>
+                  updateField("pickupLocationId", event.target.value)
+                }
+                className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm font-normal outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[oklch(0.62_0.11_150/0.18)]"
+              >
+                <option value="">Select pickup</option>
+                {pampangaLocations.map((location) => (
+                  <option key={location.id} value={location.id}>
+                    {location.name}
+                  </option>
+                ))}
+              </select>
+              {errors.pickupLocationId ? (
+                <span className="text-xs font-medium text-[var(--danger-foreground)]">
+                  {errors.pickupLocationId}
+                </span>
+              ) : null}
+            </label>
+
+            <label className="grid gap-2 text-sm font-medium text-[var(--foreground)]">
+              Drop-off location
+              <select
+                value={formState.dropOffLocationId}
+                onChange={(event) =>
+                  updateField("dropOffLocationId", event.target.value)
+                }
+                className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm font-normal outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[oklch(0.62_0.11_150/0.18)]"
+              >
+                <option value="">Select drop-off</option>
+                {pampangaLocations.map((location) => (
+                  <option key={location.id} value={location.id}>
+                    {location.name}
+                  </option>
+                ))}
+              </select>
+              {errors.dropOffLocationId ? (
+                <span className="text-xs font-medium text-[var(--danger-foreground)]">
+                  {errors.dropOffLocationId}
+                </span>
+              ) : null}
+            </label>
+          </div>
+
+          {errors.route ? (
+            <p className="rounded-xl border border-[oklch(0.79_0.055_28)] bg-[var(--danger-soft)] px-3 py-2 text-sm font-medium text-[var(--danger-foreground)]">
+              {errors.route}
+            </p>
+          ) : null}
+
+          <label className="grid gap-2 text-sm font-medium text-[var(--foreground)]">
+            Package or request notes
+            <textarea
+              value={formState.notes}
+              onChange={(event) => updateField("notes", event.target.value)}
+              rows={3}
+              className="resize-none rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm font-normal outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[oklch(0.62_0.11_150/0.18)]"
+              placeholder="Short handling note or passenger request"
+            />
+          </label>
+
+          <div className="flex flex-col gap-3 rounded-xl bg-[var(--surface-raised)] p-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-medium text-[var(--muted-foreground)]">
+                Estimate preview
+              </p>
+              {estimate ? (
+                <p className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                  {formatApproxDistance(estimate.distanceKm)} /{" "}
+                  {formatPeso(estimate.priceEstimate)}
+                </p>
+              ) : (
+                <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                  Choose different pickup and drop-off locations.
+                </p>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="pd-pressable inline-flex justify-center rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-[var(--accent-foreground)] hover:bg-[var(--accent-strong)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+            >
+              Create local booking
+            </button>
+          </div>
+
+          {createdBookingId ? (
+            <p className="rounded-xl border border-[oklch(0.78_0.055_151)] bg-[var(--success-soft)] px-3 py-2 text-sm font-medium text-[var(--success-foreground)]">
+              {createdBookingId} added to the local booking list.
+            </p>
+          ) : null}
+        </form>
+      </section>
 
       <section className="pd-card overflow-hidden rounded-2xl">
         <div className="flex flex-col gap-3 border-b border-[var(--border)] bg-[var(--surface-raised)] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -38,13 +307,13 @@ export default function BookingsPage() {
               Booking ledger
             </h2>
             <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-              No create or edit flow yet. These rows are sample records.
+              Local session records with approximate estimates.
             </p>
           </div>
-          <StatusPill tone="neutral">{sampleBookings.length} total</StatusPill>
+          <StatusPill tone="neutral">{bookings.length} total</StatusPill>
         </div>
         <div className="grid gap-3 p-3 md:hidden">
-          {sampleBookings.map((booking) => (
+          {bookings.map((booking) => (
             <article
               key={booking.id}
               className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4"
@@ -55,7 +324,7 @@ export default function BookingsPage() {
                     {booking.id}
                   </p>
                   <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                    Local sample record
+                    {booking.customerName}
                   </p>
                 </div>
                 <StatusPill tone={statusTone[booking.status]} dot>
@@ -93,7 +362,7 @@ export default function BookingsPage() {
                     Driver
                   </dt>
                   <dd className="mt-1 font-medium text-[var(--foreground)]">
-                    {getDriverName(booking.driverId)}
+                    {driverName(drivers, booking.driverId)}
                   </dd>
                 </div>
                 <div className="text-right">
@@ -103,6 +372,9 @@ export default function BookingsPage() {
                   <dd className="mt-1 font-semibold text-[var(--foreground)]">
                     {formatPeso(booking.priceEstimate)}
                   </dd>
+                  <dd className="mt-1 text-xs text-[var(--muted-foreground)]">
+                    {formatApproxDistance(booking.estimatedDistanceKm)}
+                  </dd>
                 </div>
               </dl>
             </article>
@@ -110,7 +382,7 @@ export default function BookingsPage() {
         </div>
 
         <div className="hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[820px] border-separate border-spacing-0 text-left text-sm">
+          <table className="w-full min-w-[980px] border-separate border-spacing-0 text-left text-sm">
             <thead className="bg-[var(--surface)] text-xs text-[var(--muted-foreground)]">
               <tr>
                 <th className="px-4 py-3 font-semibold">Booking</th>
@@ -124,7 +396,7 @@ export default function BookingsPage() {
               </tr>
             </thead>
             <tbody>
-              {sampleBookings.map((booking) => (
+              {bookings.map((booking) => (
                 <tr
                   key={booking.id}
                   className="transition-colors hover:bg-[var(--surface-raised)]"
@@ -134,7 +406,7 @@ export default function BookingsPage() {
                       {booking.id}
                     </p>
                     <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                      Local sample record
+                      {booking.customerName}
                     </p>
                   </td>
                   <td className="border-t border-[var(--border)] px-4 py-4">
@@ -167,10 +439,13 @@ export default function BookingsPage() {
                     </StatusPill>
                   </td>
                   <td className="border-t border-[var(--border)] px-4 py-4 font-medium text-[var(--foreground)]">
-                    {getDriverName(booking.driverId)}
+                    {driverName(drivers, booking.driverId)}
                   </td>
                   <td className="border-t border-[var(--border)] px-4 py-4 text-right font-medium text-[var(--foreground)]">
-                    {formatPeso(booking.priceEstimate)}
+                    <p>{formatPeso(booking.priceEstimate)}</p>
+                    <p className="mt-1 text-xs font-normal text-[var(--muted-foreground)]">
+                      {formatApproxDistance(booking.estimatedDistanceKm)}
+                    </p>
                   </td>
                 </tr>
               ))}

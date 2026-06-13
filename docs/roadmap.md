@@ -28,7 +28,7 @@ Outcome: A clean modern foundation is ready for product development, with local 
 
 ## Phase 2: Pampanga Map View
 
-Status: In progress. Phase 2A map view foundation and Phase 2B visual polish are complete.
+Status: Complete through Phase 2C.
 
 Milestones:
 
@@ -36,6 +36,7 @@ Milestones:
 - Add Pampanga city and municipality markers from local sample data. Complete in Phase 2A.
 - Add a sample booking pickup/drop-off preview without real route calculation. Complete in Phase 2A.
 - Refine the app shell, dashboard, data pages, map panels, and status styling into a more portfolio-ready operations interface. Complete in Phase 2B.
+- Capture desktop and mobile screenshot QA evidence and address small responsive issues. Complete in Phase 2C.
 - Add pickup and drop-off marker interactions. Planned for a later Phase 2 pass.
 - Define expanded Pampanga landmark data. Planned.
 - Display selected route context in the UI. Planned.
@@ -44,16 +45,19 @@ Outcome: Users can now view a Pampanga-focused map with service-area markers and
 
 ## Phase 3: Booking and Dispatch Logic
 
-Status: Planned.
+Status: In progress. Phase 3A booking and dispatch logic foundation is complete.
 
 Milestones:
 
-- Build booking flows for ride, parcel delivery, and food delivery.
-- Add validation for service-specific fields.
-- Create a dispatcher view for pending bookings.
-- Implement basic driver assignment using vehicle type and availability.
+- Build a local booking creation flow for ride, parcel delivery, and food delivery. Complete in Phase 3A.
+- Add validation for required fields and same pickup/drop-off prevention. Complete in Phase 3A.
+- Add approximate straight-line distance and price estimate helpers. Complete in Phase 3A.
+- Create a dispatcher view for pending, available, and assigned local session records. Complete in Phase 3A.
+- Implement deterministic driver suggestions using availability, service capability, and nearby current location. Complete in Phase 3A.
+- Persist bookings and assignments beyond refresh. Planned.
+- Expand service-specific fields and operational edge cases. Planned.
 
-Outcome: The app supports realistic booking intake and operational dispatch workflows.
+Outcome: The app now supports local session booking intake and driver assignment previews without pretending to have persistence, authentication, or real road routing.
 
 ## Phase 4: Routing and Estimates
 

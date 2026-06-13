@@ -1,27 +1,32 @@
+"use client";
+
 import { MapPin, RadioTower, Truck } from "lucide-react";
 import { MetricCard } from "@/components/metric-card";
 import { PageHeader } from "@/components/page-header";
 import { StatusPill } from "@/components/status-pill";
 import { getLocationName } from "@/data/pampanga-locations";
-import { sampleDrivers } from "@/data/sample-drivers";
 import { driverStatusLabels, type DriverStatus } from "@/domain/driver";
+import { serviceTypeLabels } from "@/domain/service-type";
+import { useDispatchDemo } from "@/features/dispatch/dispatch-demo-provider";
 
 const driverStatusTone: Record<
   DriverStatus,
   "neutral" | "info" | "success" | "warning" | "danger"
 > = {
   available: "success",
-  busy: "info",
+  assigned: "info",
   offline: "neutral",
 };
 
 export default function DriversPage() {
-  const availableCount = sampleDrivers.filter(
+  const { drivers } = useDispatchDemo();
+  const availableCount = drivers.filter(
     (driver) => driver.status === "available",
   ).length;
-  const busyCount = sampleDrivers.filter((driver) => driver.status === "busy")
-    .length;
-  const offlineCount = sampleDrivers.filter(
+  const assignedCount = drivers.filter(
+    (driver) => driver.status === "assigned",
+  ).length;
+  const offlineCount = drivers.filter(
     (driver) => driver.status === "offline",
   ).length;
 
@@ -30,21 +35,21 @@ export default function DriversPage() {
       <PageHeader
         title="Drivers"
         eyebrow="Driver resources"
-        meta={`${sampleDrivers.length} sample drivers`}
-        description="A local roster showing vehicle capacity, current municipality, availability, and active assignment state."
+        meta={`${drivers.length} local drivers`}
+        description="A local roster showing vehicle capacity, service coverage, current municipality, availability, and active assignment state."
       />
 
       <section className="grid gap-3 md:grid-cols-3">
         <MetricCard
           label="Available"
           value={availableCount}
-          note="Ready for future assignment"
+          note="Ready for local assignment"
           icon={Truck}
           tone="green"
         />
         <MetricCard
-          label="Busy"
-          value={busyCount}
+          label="Assigned"
+          value={assignedCount}
           note="Currently tied to a booking"
           icon={RadioTower}
           tone="blue"
@@ -59,11 +64,8 @@ export default function DriversPage() {
       </section>
 
       <section className="grid gap-3 lg:grid-cols-2">
-        {sampleDrivers.map((driver) => (
-          <article
-            key={driver.id}
-            className="pd-card-flat rounded-2xl p-4"
-          >
+        {drivers.map((driver) => (
+          <article key={driver.id} className="pd-card-flat rounded-2xl p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-start gap-3">
                 <div className="grid size-10 place-items-center rounded-xl bg-[var(--muted)] text-[var(--foreground)]">
@@ -81,6 +83,17 @@ export default function DriversPage() {
               <StatusPill tone={driverStatusTone[driver.status]} dot>
                 {driverStatusLabels[driver.status]}
               </StatusPill>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {driver.serviceTypes.map((serviceType) => (
+                <span
+                  key={serviceType}
+                  className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-xs font-medium text-[var(--muted-foreground)]"
+                >
+                  {serviceTypeLabels[serviceType]}
+                </span>
+              ))}
             </div>
 
             <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">

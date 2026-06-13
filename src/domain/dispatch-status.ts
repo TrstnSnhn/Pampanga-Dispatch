@@ -1,14 +1,36 @@
 export type DispatchStatus =
   | "pending"
   | "assigned"
-  | "in-progress"
+  | "picked_up"
+  | "in_transit"
   | "completed"
   | "cancelled";
 
 export const dispatchStatusLabels: Record<DispatchStatus, string> = {
   pending: "Pending",
   assigned: "Assigned",
-  "in-progress": "In progress",
+  picked_up: "Picked up",
+  in_transit: "In transit",
   completed: "Completed",
   cancelled: "Cancelled",
 };
+
+const nextStatuses: Record<DispatchStatus, DispatchStatus[]> = {
+  pending: ["assigned", "cancelled"],
+  assigned: ["picked_up", "cancelled"],
+  picked_up: ["in_transit", "cancelled"],
+  in_transit: ["completed", "cancelled"],
+  completed: [],
+  cancelled: [],
+};
+
+export function getNextBookingStatuses(status: DispatchStatus) {
+  return nextStatuses[status];
+}
+
+export function canTransitionBookingStatus(
+  currentStatus: DispatchStatus,
+  nextStatus: DispatchStatus,
+) {
+  return nextStatuses[currentStatus].includes(nextStatus);
+}

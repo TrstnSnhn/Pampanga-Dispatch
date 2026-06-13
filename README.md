@@ -18,18 +18,21 @@ See [docs/legacy-inventory.md](docs/legacy-inventory.md) for the full inventory.
 
 ## Current Status
 
-Phase 0 legacy preservation and documentation are complete. Phase 1 has scaffolded the modern Next.js foundation with local sample data and read-only dashboard pages. Phase 2A adds a Pampanga map view with local markers and a sample booking pickup/drop-off preview.
+Phase 0 legacy preservation and documentation are complete. Phase 1 scaffolded the modern Next.js foundation with local sample data. Phase 2 added the Pampanga map view, visual polish, screenshot QA evidence, and mobile layout fixes.
 
-Routing is not implemented yet. The current map preview does not calculate real road paths, and no database connection has been added.
+Phase 3A adds local-only booking creation, approximate straight-line distance estimates, service-based pricing estimates, deterministic driver suggestions, and session-only dispatch assignment.
 
-Phase 2B refines the visual design into a more portfolio-ready local logistics dashboard with stronger navigation, clearer data hierarchy, improved map panels, and documented design tokens.
+Routing is not implemented yet. The current map preview does not calculate real road paths, no database connection has been added, and local demo state resets on refresh.
 
 ## Local Development
 
 ```bash
 npm install
 npm run dev
+npm test
 ```
+
+See [docs/logic-notes.md](docs/logic-notes.md) for the current local booking and dispatch assumptions.
 
 ## Roadmap
 

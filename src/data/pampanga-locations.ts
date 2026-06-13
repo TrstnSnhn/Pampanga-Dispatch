@@ -1,4 +1,8 @@
-import type { PampangaLocation } from "@/domain/location";
+import {
+  findLocationById,
+  getLocationDisplayName,
+  type PampangaLocation,
+} from "../domain/location.ts";
 
 export const pampangaLocations: PampangaLocation[] = [
   {
@@ -158,12 +162,9 @@ export const pampangaLocations: PampangaLocation[] = [
 ];
 
 export function getLocationName(locationId: PampangaLocation["id"]) {
-  return (
-    pampangaLocations.find((location) => location.id === locationId)?.name ??
-    "Unknown location"
-  );
+  return getLocationDisplayName(pampangaLocations, locationId);
 }
 
 export function getLocationById(locationId: PampangaLocation["id"]) {
-  return pampangaLocations.find((location) => location.id === locationId);
+  return findLocationById(pampangaLocations, locationId);
 }

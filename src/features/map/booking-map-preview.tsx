@@ -4,6 +4,7 @@ import { ServiceBadge } from "@/components/service-badge";
 import type { Booking } from "@/domain/booking";
 import { dispatchStatusLabels } from "@/domain/dispatch-status";
 import type { PampangaLocation } from "@/domain/location";
+import { formatApproxDistance } from "@/lib/distance";
 import { formatPeso } from "@/lib/format";
 
 type BookingMapPreviewProps = {
@@ -48,10 +49,13 @@ export function BookingMapPreview({
         </div>
         <div className="rounded-xl bg-[var(--surface-raised)] p-3">
           <dt className="text-xs font-medium text-[var(--muted-foreground)]">
-            Status
+            Estimate
           </dt>
           <dd className="mt-1 text-sm font-medium text-[var(--foreground)]">
-            {dispatchStatusLabels[booking.status]}
+            {formatPeso(booking.priceEstimate)}
+          </dd>
+          <dd className="mt-1 text-xs text-[var(--muted-foreground)]">
+            {formatApproxDistance(booking.estimatedDistanceKm)}
           </dd>
         </div>
         <div className="rounded-xl bg-[var(--surface-raised)] p-3">
@@ -81,9 +85,9 @@ export function BookingMapPreview({
       </dl>
 
       <p className="mt-4 text-sm leading-6 text-[var(--muted-foreground)]">
-        Price estimate:{" "}
+        Status:{" "}
         <span className="font-semibold text-[var(--foreground)]">
-          {formatPeso(booking.priceEstimate)}
+          {dispatchStatusLabels[booking.status]}
         </span>
         . Route calculation is not implemented in this phase.
       </p>

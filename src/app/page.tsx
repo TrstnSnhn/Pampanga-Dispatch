@@ -17,7 +17,7 @@ import { dispatchStatusLabels } from "@/domain/dispatch-status";
 import { formatPeso } from "@/lib/format";
 
 const activeBookings = sampleBookings.filter((booking) =>
-  ["assigned", "in-progress"].includes(booking.status),
+  ["assigned", "picked_up", "in_transit"].includes(booking.status),
 );
 const availableDrivers = sampleDrivers.filter(
   (driver) => driver.status === "available",
@@ -101,7 +101,7 @@ export default function Home() {
       <PageHeader
         title="Pampanga Dispatch"
         eyebrow="Map-first dispatch console"
-        meta="Phase 2B visual polish"
+        meta="Phase 3A local logic"
         description="A local operations dashboard for reviewing Pampanga bookings, drivers, dispatch state, and map context."
       />
 
@@ -157,7 +157,7 @@ export default function Home() {
                 {dispatchStatusLabels[nextBooking.status]}
               </p>
               <p className="mt-1 text-xs leading-5 text-[var(--muted-foreground)]">
-                Driver assignment remains manual in this phase.
+                Driver assignment now runs locally for the current session.
               </p>
             </div>
             <div className="rounded-xl bg-[var(--surface-raised)] p-4">

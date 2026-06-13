@@ -1,15 +1,17 @@
+"use client";
+
 import { PageHeader } from "@/components/page-header";
 import { StatusPill } from "@/components/status-pill";
 import { pampangaLocations, getLocationById } from "@/data/pampanga-locations";
-import { sampleBookings } from "@/data/sample-bookings";
+import { useDispatchDemo } from "@/features/dispatch/dispatch-demo-provider";
 import { BookingMapPreview } from "@/features/map/booking-map-preview";
 import { LocationMarkerList } from "@/features/map/location-marker-list";
 import { PampangaMap } from "@/features/map/pampanga-map";
 
 export default function MapPage() {
+  const { bookings } = useDispatchDemo();
   const previewBooking =
-    sampleBookings.find((booking) => booking.status === "pending") ??
-    sampleBookings[0];
+    bookings.find((booking) => booking.status === "pending") ?? bookings[0];
 
   const pickupLocation = previewBooking
     ? getLocationById(previewBooking.pickupLocationId)
