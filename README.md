@@ -18,7 +18,14 @@ See [docs/legacy-inventory.md](docs/legacy-inventory.md) for the full inventory.
 
 ## Current Status
 
-Phase 0 legacy preservation and documentation are complete. The modern web app has not been scaffolded yet, and no dependencies have been added.
+Phase 0 legacy preservation and documentation are complete. Phase 1 has scaffolded the modern Next.js foundation with local sample data, read-only dashboard pages, and no map routing or database connection yet.
+
+## Local Development
+
+```bash
+npm install
+npm run dev
+```
 
 ## Roadmap
 
