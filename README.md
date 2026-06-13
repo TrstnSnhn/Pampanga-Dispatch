@@ -20,7 +20,7 @@ See [docs/legacy-inventory.md](docs/legacy-inventory.md) for the full inventory.
 
 Phase 0 legacy preservation and documentation are complete. Phase 1 scaffolded the modern Next.js foundation with local sample data. Phase 2 added the Pampanga map view, visual polish, screenshot QA evidence, and mobile layout fixes.
 
-Phase 3A adds local-only booking creation, approximate straight-line distance estimates, service-based pricing estimates, deterministic driver suggestions, and session-only dispatch assignment.
+Phase 3A adds local-only booking creation, approximate straight-line distance estimates, service-based pricing estimates, deterministic driver suggestions, and session-only dispatch assignment. Phase 3B extends that into a complete local lifecycle: pending, assigned, picked up, in transit, completed, and cancelled where valid. Completing or cancelling an assigned booking releases the driver back to available.
 
 Routing is not implemented yet. The current map preview does not calculate real road paths, no database connection has been added, and local demo state resets on refresh.
 

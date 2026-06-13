@@ -108,3 +108,70 @@ export function transitionBookingStatus(
       nextStatus === "completed" ? new Date().toISOString() : booking.completedAt,
   };
 }
+
+function shouldReleaseDriver(booking: Booking) {
+  return (
+    ["completed", "cancelled"].includes(booking.status) &&
+    Boolean(booking.driverId)
+  );
+}
+
+export function releaseAssignedDriver(
+  drivers: Driver[],
+  driverId: Driver["id"],
+) {
+  return drivers.map((driver) =>
+    driver.id === driverId
+      ? {
+          ...driver,
+          status: "available" as const,
+          activeAssignmentId: undefined,
+        }
+      : driver,
+  );
+}
+
+export function applyBookingStatusTransition(
+  booking: Booking,
+  drivers: Driver[],
+  nextStatus: DispatchStatus,
+) {
+  const updatedBooking = transitionBookingStatus(booking, nextStatus);
+
+  return {
+    booking: updatedBooking,
+    drivers:
+      shouldReleaseDriver(updatedBooking) && updatedBooking.driverId
+        ? releaseAssignedDriver(drivers, updatedBooking.driverId)
+        : drivers,
+  };
+}
+
+export function summarizeDispatchOperations(bookings: Booking[]) {
+  const activeStatuses: DispatchStatus[] = [
+    "assigned",
+    "picked_up",
+    "in_transit",
+  ];
+  const completed = bookings.filter(
+    (booking) => booking.status === "completed",
+  ).length;
+  const cancelled = bookings.filter(
+    (booking) => booking.status === "cancelled",
+  ).length;
+
+  return {
+    active: bookings.filter((booking) =>
+      activeStatuses.includes(booking.status),
+    ).length,
+    pending: bookings.filter((booking) => booking.status === "pending").length,
+    assigned: bookings.filter((booking) => booking.status === "assigned").length,
+    pickedUp: bookings.filter((booking) => booking.status === "picked_up")
+      .length,
+    inTransit: bookings.filter((booking) => booking.status === "in_transit")
+      .length,
+    completed,
+    cancelled,
+    closed: completed + cancelled,
+  };
+}

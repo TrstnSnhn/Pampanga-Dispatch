@@ -5,8 +5,11 @@ import { sampleDrivers } from "../src/data/sample-drivers.ts";
 import type { Booking } from "../src/domain/booking.ts";
 import { createLocalBooking } from "../src/lib/booking-factory.ts";
 import {
+  applyBookingStatusTransition,
   assignDriverToBooking,
   suggestDriverForBooking,
+  summarizeDispatchOperations,
+  transitionBookingStatus,
 } from "../src/lib/dispatch.ts";
 import { calculateStraightLineDistanceKm } from "../src/lib/distance.ts";
 import { estimatePrice } from "../src/lib/pricing.ts";
@@ -85,4 +88,125 @@ test("assigning a driver changes booking status and driver availability", () => 
   assert.equal(result.booking.driverId, driver.id);
   assert.equal(result.driver.status, "assigned");
   assert.equal(result.driver.activeAssignmentId, angelesToMabalacatBooking.id);
+});
+
+test("booking status flow moves through assigned, picked up, in transit, and completed", () => {
+  const assigned = transitionBookingStatus(
+    {
+      ...angelesToMabalacatBooking,
+      status: "assigned",
+      driverId: "drv-001",
+    },
+    "picked_up",
+  );
+  const inTransit = transitionBookingStatus(assigned, "in_transit");
+  const completed = transitionBookingStatus(inTransit, "completed");
+
+  assert.equal(assigned.status, "picked_up");
+  assert.equal(inTransit.status, "in_transit");
+  assert.equal(completed.status, "completed");
+  assert.ok(completed.completedAt);
+});
+
+test("invalid status transitions are prevented", () => {
+  assert.throws(
+    () =>
+      transitionBookingStatus(
+        {
+          ...angelesToMabalacatBooking,
+          status: "picked_up",
+          driverId: "drv-001",
+        },
+        "cancelled",
+      ),
+    /Cannot move booking from picked_up to cancelled/,
+  );
+  assert.throws(
+    () =>
+      transitionBookingStatus(
+        {
+          ...angelesToMabalacatBooking,
+          status: "completed",
+          driverId: "drv-001",
+        },
+        "cancelled",
+      ),
+    /Cannot move booking from completed to cancelled/,
+  );
+});
+
+test("completing an assigned booking releases the driver", () => {
+  const assignedBooking: Booking = {
+    ...angelesToMabalacatBooking,
+    status: "in_transit",
+    driverId: "drv-001",
+  };
+  const assignedDriver = {
+    ...sampleDrivers[0],
+    status: "assigned" as const,
+    activeAssignmentId: assignedBooking.id,
+  };
+
+  const result = applyBookingStatusTransition(
+    assignedBooking,
+    [assignedDriver],
+    "completed",
+  );
+
+  assert.equal(result.booking.status, "completed");
+  assert.equal(result.drivers[0].status, "available");
+  assert.equal(result.drivers[0].activeAssignmentId, undefined);
+});
+
+test("cancelling an assigned booking releases the driver", () => {
+  const assignedBooking: Booking = {
+    ...angelesToMabalacatBooking,
+    status: "assigned",
+    driverId: "drv-001",
+  };
+  const assignedDriver = {
+    ...sampleDrivers[0],
+    status: "assigned" as const,
+    activeAssignmentId: assignedBooking.id,
+  };
+
+  const result = applyBookingStatusTransition(
+    assignedBooking,
+    [assignedDriver],
+    "cancelled",
+  );
+
+  assert.equal(result.booking.status, "cancelled");
+  assert.equal(result.drivers[0].status, "available");
+  assert.equal(result.drivers[0].activeAssignmentId, undefined);
+});
+
+test("cancelling an unassigned pending booking does not affect drivers", () => {
+  const availableDriver = sampleDrivers[0];
+
+  const result = applyBookingStatusTransition(
+    angelesToMabalacatBooking,
+    [availableDriver],
+    "cancelled",
+  );
+
+  assert.equal(result.booking.status, "cancelled");
+  assert.equal(result.drivers[0], availableDriver);
+});
+
+test("dispatch summary counts local workflow states", () => {
+  const summary = summarizeDispatchOperations([
+    { ...angelesToMabalacatBooking, status: "pending" },
+    { ...angelesToMabalacatBooking, id: "BKG-A", status: "assigned" },
+    { ...angelesToMabalacatBooking, id: "BKG-P", status: "picked_up" },
+    { ...angelesToMabalacatBooking, id: "BKG-T", status: "in_transit" },
+    { ...angelesToMabalacatBooking, id: "BKG-C", status: "completed" },
+    { ...angelesToMabalacatBooking, id: "BKG-X", status: "cancelled" },
+  ]);
+
+  assert.equal(summary.pending, 1);
+  assert.equal(summary.active, 3);
+  assert.equal(summary.completed, 1);
+  assert.equal(summary.cancelled, 1);
+  assert.equal(summary.closed, 2);
 });

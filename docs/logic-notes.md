@@ -1,12 +1,13 @@
 # Logic Notes
 
-Phase 3A adds practical local booking and dispatch behavior for the modern Pampanga Dispatch app. The logic is intentionally small, deterministic, and honest about its limits.
+Phase 3A added practical local booking and dispatch behavior for the modern Pampanga Dispatch app. Phase 3B extends it with session-only lifecycle management. The logic is intentionally small, deterministic, and honest about its limits.
 
 ## Local Demo State
 
 - Bookings and drivers are stored in a client-side React provider.
 - State is seeded from local TypeScript sample data.
 - New bookings and assignments last only for the current browser session.
+- Status changes also last only for the current browser session.
 - Refreshing the page resets the data to the sample records.
 - No database, authentication, server actions, or API persistence is connected.
 
@@ -31,6 +32,9 @@ Phase 3A adds practical local booking and dispatch behavior for the modern Pampa
 - Suggested drivers are sorted by approximate straight-line distance from the driver's current location to the pickup location.
 - Ties are resolved by driver name for deterministic results.
 - Assigning a booking changes the booking status to `assigned` and the driver status to `assigned`.
+- Completing an assigned booking releases the driver back to `available`.
+- Cancelling an assigned booking before pickup releases the driver back to `available`.
+- Cancelling an unassigned pending booking does not affect driver state.
 
 ## Status Flow
 
@@ -47,8 +51,8 @@ Allowed transitions:
 
 - `pending` to `assigned` or `cancelled`
 - `assigned` to `picked_up` or `cancelled`
-- `picked_up` to `in_transit` or `cancelled`
-- `in_transit` to `completed` or `cancelled`
+- `picked_up` to `in_transit`
+- `in_transit` to `completed`
 
 Completed and cancelled bookings are terminal states in this phase.
 

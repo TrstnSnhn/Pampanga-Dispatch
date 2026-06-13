@@ -11,8 +11,10 @@ import {
 } from "@/data/pampanga-locations";
 import {
   dispatchStatusLabels,
+  getNextBookingStatuses,
   type DispatchStatus,
 } from "@/domain/dispatch-status";
+import type { Booking } from "@/domain/booking";
 import type { PampangaLocation } from "@/domain/location";
 import type { ServiceType } from "@/domain/service-type";
 import { serviceTypeLabels } from "@/domain/service-type";
@@ -48,6 +50,25 @@ type BookingFormState = {
   notes: string;
 };
 
+type BookingFilter =
+  | "all"
+  | "pending"
+  | "assigned"
+  | "active"
+  | "completed"
+  | "cancelled";
+
+const bookingFilters: Array<{ value: BookingFilter; label: string }> = [
+  { value: "all", label: "All" },
+  { value: "pending", label: "Pending" },
+  { value: "assigned", label: "Assigned" },
+  { value: "active", label: "Active" },
+  { value: "completed", label: "Completed" },
+  { value: "cancelled", label: "Cancelled" },
+];
+
+const activeStatuses: DispatchStatus[] = ["assigned", "picked_up", "in_transit"];
+
 const initialFormState: BookingFormState = {
   customerName: "",
   serviceType: "ride",
@@ -65,6 +86,46 @@ function driverName(
   }
 
   return drivers.find((driver) => driver.id === driverId)?.name ?? "Unknown";
+}
+
+function isLocalBooking(booking: Booking) {
+  return booking.id.startsWith("BKG-LOCAL");
+}
+
+function bookingMatchesFilter(booking: Booking, filter: BookingFilter) {
+  if (filter === "all") {
+    return true;
+  }
+
+  if (filter === "active") {
+    return activeStatuses.includes(booking.status);
+  }
+
+  return booking.status === filter;
+}
+
+function nextActionLabel(booking: Booking) {
+  const nextStatuses = getNextBookingStatuses(booking.status);
+
+  if (nextStatuses.length === 0) {
+    return booking.status === "completed"
+      ? "Closed: completed"
+      : "Closed: cancelled";
+  }
+
+  if (booking.status === "pending") {
+    return "Next: assign driver or cancel";
+  }
+
+  if (booking.status === "assigned") {
+    return "Next: mark picked up or cancel";
+  }
+
+  if (booking.status === "picked_up") {
+    return "Next: mark in transit";
+  }
+
+  return "Next: complete booking";
 }
 
 function estimateForForm(formState: BookingFormState) {
@@ -114,7 +175,17 @@ export default function BookingsPage() {
     useState<BookingFormState>(initialFormState);
   const [errors, setErrors] = useState<BookingValidationErrors>({});
   const [createdBookingId, setCreatedBookingId] = useState<string | undefined>();
+  const [bookingFilter, setBookingFilter] = useState<BookingFilter>("all");
   const estimate = useMemo(() => estimateForForm(formState), [formState]);
+  const filteredBookings = useMemo(
+    () =>
+      bookings.filter((booking) =>
+        bookingMatchesFilter(booking, bookingFilter),
+      ),
+    [bookingFilter, bookings],
+  );
+  const localBookingCount = bookings.filter(isLocalBooking).length;
+  const sampleBookingCount = bookings.length - localBookingCount;
 
   function updateField<Field extends keyof BookingFormState>(
     field: Field,
@@ -307,13 +378,33 @@ export default function BookingsPage() {
               Booking ledger
             </h2>
             <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-              Local session records with approximate estimates.
+              {localBookingCount} local, {sampleBookingCount} sample. Filters do
+              not persist after refresh.
             </p>
           </div>
-          <StatusPill tone="neutral">{bookings.length} total</StatusPill>
+          <StatusPill tone="neutral">
+            {filteredBookings.length} shown
+          </StatusPill>
+        </div>
+        <div className="flex gap-2 overflow-x-auto border-b border-[var(--border)] px-3 py-3">
+          {bookingFilters.map((filter) => (
+            <button
+              key={filter.value}
+              type="button"
+              onClick={() => setBookingFilter(filter.value)}
+              className={`pd-pressable rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                bookingFilter === filter.value
+                  ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]"
+                  : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted-foreground)] hover:bg-[var(--surface-raised)]"
+              }`}
+            >
+              {filter.label}
+            </button>
+          ))}
         </div>
         <div className="grid gap-3 p-3 md:hidden">
-          {bookings.map((booking) => (
+          {filteredBookings.length > 0 ? (
+            filteredBookings.map((booking) => (
             <article
               key={booking.id}
               className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4"
@@ -332,9 +423,16 @@ export default function BookingsPage() {
                 </StatusPill>
               </div>
 
-              <div className="mt-4">
+              <div className="mt-4 flex flex-wrap gap-2">
                 <ServiceBadge serviceType={booking.serviceType} />
+                <StatusPill tone={isLocalBooking(booking) ? "info" : "neutral"}>
+                  {isLocalBooking(booking) ? "Local" : "Sample"}
+                </StatusPill>
               </div>
+
+              <p className="mt-3 rounded-xl bg-[var(--surface-raised)] px-3 py-2 text-xs font-semibold text-[var(--foreground)]">
+                {nextActionLabel(booking)}
+              </p>
 
               <div className="mt-4 grid gap-3 rounded-xl bg-[var(--surface-raised)] p-3">
                 <div>
@@ -378,11 +476,16 @@ export default function BookingsPage() {
                 </div>
               </dl>
             </article>
-          ))}
+            ))
+          ) : (
+            <p className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--muted-foreground)]">
+              No bookings match this filter.
+            </p>
+          )}
         </div>
 
         <div className="hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[980px] border-separate border-spacing-0 text-left text-sm">
+          <table className="w-full min-w-[1080px] border-separate border-spacing-0 text-left text-sm">
             <thead className="bg-[var(--surface)] text-xs text-[var(--muted-foreground)]">
               <tr>
                 <th className="px-4 py-3 font-semibold">Booking</th>
@@ -396,7 +499,8 @@ export default function BookingsPage() {
               </tr>
             </thead>
             <tbody>
-              {bookings.map((booking) => (
+              {filteredBookings.length > 0 ? (
+                filteredBookings.map((booking) => (
                 <tr
                   key={booking.id}
                   className="transition-colors hover:bg-[var(--surface-raised)]"
@@ -407,6 +511,9 @@ export default function BookingsPage() {
                     </p>
                     <p className="mt-1 text-xs text-[var(--muted-foreground)]">
                       {booking.customerName}
+                    </p>
+                    <p className="mt-2 text-xs font-medium text-[var(--muted-foreground)]">
+                      {isLocalBooking(booking) ? "Local session" : "Sample seed"}
                     </p>
                   </td>
                   <td className="border-t border-[var(--border)] px-4 py-4">
@@ -437,6 +544,9 @@ export default function BookingsPage() {
                     <StatusPill tone={statusTone[booking.status]} dot>
                       {dispatchStatusLabels[booking.status]}
                     </StatusPill>
+                    <p className="mt-2 text-xs text-[var(--muted-foreground)]">
+                      {nextActionLabel(booking)}
+                    </p>
                   </td>
                   <td className="border-t border-[var(--border)] px-4 py-4 font-medium text-[var(--foreground)]">
                     {driverName(drivers, booking.driverId)}
@@ -448,7 +558,17 @@ export default function BookingsPage() {
                     </p>
                   </td>
                 </tr>
-              ))}
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="border-t border-[var(--border)] px-4 py-8 text-center text-sm text-[var(--muted-foreground)]"
+                  >
+                    No bookings match this filter.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

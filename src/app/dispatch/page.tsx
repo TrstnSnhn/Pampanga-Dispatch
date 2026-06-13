@@ -16,6 +16,7 @@ import {
   findAvailableDrivers,
   getSuggestedDriverDistanceKm,
   suggestDriverForBooking,
+  summarizeDispatchOperations,
 } from "@/lib/dispatch";
 import { formatApproxDistance } from "@/lib/distance";
 import { formatPeso } from "@/lib/format";
@@ -47,6 +48,14 @@ export default function DispatchPage() {
     () => bookings.filter((booking) => activeStatuses.includes(booking.status)),
     [bookings],
   );
+  const closedBookings = useMemo(
+    () =>
+      bookings.filter((booking) =>
+        ["completed", "cancelled"].includes(booking.status),
+      ),
+    [bookings],
+  );
+  const summary = useMemo(() => summarizeDispatchOperations(bookings), [bookings]);
 
   function driverName(driverId?: string) {
     if (!driverId) {
@@ -70,7 +79,13 @@ export default function DispatchPage() {
   }
 
   function handleStatusChange(bookingId: string, nextStatus: DispatchStatus) {
-    updateBookingStatus(bookingId, nextStatus);
+    const result = updateBookingStatus(bookingId, nextStatus);
+
+    if (!result.ok) {
+      setAssignmentMessage(result.message);
+      return;
+    }
+
     setAssignmentMessage(
       `${bookingId} moved to ${dispatchStatusLabels[nextStatus]} locally.`,
     );
@@ -82,7 +97,7 @@ export default function DispatchPage() {
         title="Dispatch"
         eyebrow="Local dispatch logic"
         meta={`${pendingBookings.length} pending, ${availableDrivers.length} available`}
-        description="Review pending bookings, see deterministic driver suggestions, and apply session-only assignments."
+        description="Review pending bookings, see deterministic driver suggestions, and move bookings through a session-only lifecycle."
       />
 
       <section className="pd-card-flat rounded-2xl p-5">
@@ -105,6 +120,41 @@ export default function DispatchPage() {
           <StatusPill tone="warning" dot>
             Session only
           </StatusPill>
+        </div>
+
+        <div className="mt-4 grid gap-2 sm:grid-cols-4">
+          <div className="rounded-xl bg-[var(--surface)] p-3">
+            <p className="text-xs font-medium text-[var(--muted-foreground)]">
+              Pending
+            </p>
+            <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">
+              {summary.pending}
+            </p>
+          </div>
+          <div className="rounded-xl bg-[var(--surface)] p-3">
+            <p className="text-xs font-medium text-[var(--muted-foreground)]">
+              Active
+            </p>
+            <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">
+              {summary.active}
+            </p>
+          </div>
+          <div className="rounded-xl bg-[var(--surface)] p-3">
+            <p className="text-xs font-medium text-[var(--muted-foreground)]">
+              Completed
+            </p>
+            <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">
+              {summary.completed}
+            </p>
+          </div>
+          <div className="rounded-xl bg-[var(--surface)] p-3">
+            <p className="text-xs font-medium text-[var(--muted-foreground)]">
+              Cancelled
+            </p>
+            <p className="mt-1 text-lg font-semibold text-[var(--foreground)]">
+              {summary.cancelled}
+            </p>
+          </div>
         </div>
 
         {assignmentMessage ? (
@@ -139,7 +189,11 @@ export default function DispatchPage() {
                   : undefined;
 
                 return (
-                  <div key={booking.id} className="grid gap-4 p-4 lg:grid-cols-2">
+                  <div
+                    key={booking.id}
+                    data-booking-id={booking.id}
+                    className="grid gap-4 p-4 lg:grid-cols-2"
+                  >
                     <div className="grid gap-4 sm:grid-cols-[1fr_1fr]">
                       <div>
                         <p className="text-sm font-semibold text-[var(--foreground)]">
@@ -214,12 +268,32 @@ export default function DispatchPage() {
                             >
                               Assign
                             </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleStatusChange(booking.id, "cancelled")
+                              }
+                              className="pd-pressable inline-flex justify-center rounded-xl border border-[oklch(0.79_0.055_28)] bg-[var(--danger-soft)] px-3 py-2 text-sm font-semibold text-[var(--danger-foreground)] hover:bg-[oklch(0.9_0.04_28)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+                            >
+                              Cancel
+                            </button>
                           </div>
                         </>
                       ) : (
-                        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-                          No available driver currently matches this service.
-                        </p>
+                        <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <p className="text-sm text-[var(--muted-foreground)]">
+                            No available driver currently matches this service.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleStatusChange(booking.id, "cancelled")
+                            }
+                            className="pd-pressable inline-flex justify-center rounded-xl border border-[oklch(0.79_0.055_28)] bg-[var(--danger-soft)] px-3 py-2 text-sm font-semibold text-[var(--danger-foreground)] hover:bg-[oklch(0.9_0.04_28)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+                          >
+                            Cancel
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -273,7 +347,7 @@ export default function DispatchPage() {
       <section className="pd-card rounded-2xl">
         <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--surface-raised)] px-4 py-3">
           <h2 className="text-sm font-semibold text-[var(--foreground)]">
-            Assigned bookings
+            Assigned and active bookings
           </h2>
           <StatusPill tone="info">{activeBookings.length}</StatusPill>
         </div>
@@ -285,6 +359,7 @@ export default function DispatchPage() {
               return (
                 <div
                   key={booking.id}
+                  data-booking-id={booking.id}
                   className="grid gap-4 p-4 lg:grid-cols-[1fr_auto]"
                 >
                   <div>
@@ -300,6 +375,14 @@ export default function DispatchPage() {
                       {driverName(booking.driverId)} assigned from{" "}
                       {getLocationName(booking.pickupLocationId)} to{" "}
                       {getLocationName(booking.dropOffLocationId)}
+                    </p>
+                    <p className="mt-1 text-xs font-medium text-[var(--muted-foreground)]">
+                      Next valid action:{" "}
+                      {nextStatuses.length > 0
+                        ? nextStatuses
+                            .map((status) => dispatchStatusLabels[status])
+                            .join(" or ")
+                        : "None"}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2 lg:justify-end">
@@ -320,6 +403,62 @@ export default function DispatchPage() {
           ) : (
             <p className="p-4 text-sm text-[var(--muted-foreground)]">
               Assign a pending booking to populate this local session panel.
+            </p>
+          )}
+        </div>
+      </section>
+
+      <section className="pd-card rounded-2xl">
+        <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--surface-raised)] px-4 py-3">
+          <h2 className="text-sm font-semibold text-[var(--foreground)]">
+            Completed and closed bookings
+          </h2>
+          <StatusPill tone="neutral">{closedBookings.length}</StatusPill>
+        </div>
+        <div className="divide-y divide-[var(--border)]">
+          {closedBookings.length > 0 ? (
+            closedBookings.map((booking) => (
+              <div
+                key={booking.id}
+                data-booking-id={booking.id}
+                className="grid gap-3 p-4 md:grid-cols-[1fr_auto_auto]"
+              >
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-sm font-semibold text-[var(--foreground)]">
+                      {booking.id}
+                    </p>
+                    <StatusPill tone={statusTone[booking.status]} dot>
+                      {dispatchStatusLabels[booking.status]}
+                    </StatusPill>
+                  </div>
+                  <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+                    {getLocationName(booking.pickupLocationId)} to{" "}
+                    {getLocationName(booking.dropOffLocationId)}
+                  </p>
+                </div>
+                <div className="md:text-right">
+                  <p className="text-xs font-medium text-[var(--muted-foreground)]">
+                    Driver
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                    {driverName(booking.driverId)}
+                  </p>
+                </div>
+                <div className="md:text-right">
+                  <p className="text-xs font-medium text-[var(--muted-foreground)]">
+                    Estimate
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-[var(--foreground)]">
+                    {formatPeso(booking.priceEstimate)}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="p-4 text-sm text-[var(--muted-foreground)]">
+              Completed and cancelled bookings will appear here as the session
+              progresses.
             </p>
           )}
         </div>

@@ -20,9 +20,9 @@ import {
   validateBookingInput,
 } from "@/lib/booking-factory";
 import {
+  applyBookingStatusTransition,
   assignDriverToBooking,
   suggestDriverForBooking,
-  transitionBookingStatus,
 } from "@/lib/dispatch";
 import { pampangaLocations } from "@/data/pampanga-locations";
 
@@ -34,15 +34,22 @@ type AssignDriverResult =
   | { ok: true; booking: Booking; driver: Driver }
   | { ok: false; message: string };
 
+type UpdateBookingStatusResult =
+  | { ok: true; booking: Booking; drivers: Driver[] }
+  | { ok: false; message: string };
+
 type DispatchDemoContextValue = {
   bookings: Booking[];
   drivers: Driver[];
   createBooking: (input: CreateBookingInput) => CreateBookingResult;
-  assignDriver: (bookingId: Booking["id"], driverId?: Driver["id"]) => AssignDriverResult;
+  assignDriver: (
+    bookingId: Booking["id"],
+    driverId?: Driver["id"],
+  ) => AssignDriverResult;
   updateBookingStatus: (
     bookingId: Booking["id"],
     nextStatus: DispatchStatus,
-  ) => void;
+  ) => UpdateBookingStatusResult;
   resetDemoState: () => void;
 };
 
@@ -130,39 +137,36 @@ export function DispatchDemoProvider({ children }: { children: ReactNode }) {
   );
 
   const updateBookingStatus = useCallback(
-    (bookingId: Booking["id"], nextStatus: DispatchStatus) => {
+    (
+      bookingId: Booking["id"],
+      nextStatus: DispatchStatus,
+    ): UpdateBookingStatusResult => {
       const booking = bookings.find((candidate) => candidate.id === bookingId);
 
       if (!booking) {
-        return;
+        return { ok: false, message: "Booking was not found." };
       }
 
-      const updatedBooking = transitionBookingStatus(booking, nextStatus);
+      try {
+        const result = applyBookingStatusTransition(booking, drivers, nextStatus);
 
-      setBookings((currentBookings) =>
-        currentBookings.map((candidate) =>
-          candidate.id === bookingId ? updatedBooking : candidate,
-        ),
-      );
-
-      if (
-        ["completed", "cancelled"].includes(updatedBooking.status) &&
-        updatedBooking.driverId
-      ) {
-        setDrivers((currentDrivers) =>
-          currentDrivers.map((driver) =>
-            driver.id === updatedBooking.driverId
-              ? {
-                  ...driver,
-                  status: "available",
-                  activeAssignmentId: undefined,
-                }
-              : driver,
+        setBookings((currentBookings) =>
+          currentBookings.map((candidate) =>
+            candidate.id === bookingId ? result.booking : candidate,
           ),
         );
+        setDrivers(result.drivers);
+
+        return { ok: true, ...result };
+      } catch (error) {
+        return {
+          ok: false,
+          message:
+            error instanceof Error ? error.message : "Status update failed.",
+        };
       }
     },
-    [bookings],
+    [bookings, drivers],
   );
 
   const resetDemoState = useCallback(() => {
@@ -180,7 +184,14 @@ export function DispatchDemoProvider({ children }: { children: ReactNode }) {
       updateBookingStatus,
       resetDemoState,
     }),
-    [assignDriver, bookings, createBooking, drivers, resetDemoState, updateBookingStatus],
+    [
+      assignDriver,
+      bookings,
+      createBooking,
+      drivers,
+      resetDemoState,
+      updateBookingStatus,
+    ],
   );
 
   return (

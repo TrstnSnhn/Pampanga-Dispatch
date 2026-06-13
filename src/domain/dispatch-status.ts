@@ -18,8 +18,8 @@ export const dispatchStatusLabels: Record<DispatchStatus, string> = {
 const nextStatuses: Record<DispatchStatus, DispatchStatus[]> = {
   pending: ["assigned", "cancelled"],
   assigned: ["picked_up", "cancelled"],
-  picked_up: ["in_transit", "cancelled"],
-  in_transit: ["completed", "cancelled"],
+  picked_up: ["in_transit"],
+  in_transit: ["completed"],
   completed: [],
   cancelled: [],
 };

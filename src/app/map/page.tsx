@@ -11,7 +11,11 @@ import { PampangaMap } from "@/features/map/pampanga-map";
 export default function MapPage() {
   const { bookings } = useDispatchDemo();
   const previewBooking =
-    bookings.find((booking) => booking.status === "pending") ?? bookings[0];
+    bookings.find((booking) =>
+      ["assigned", "picked_up", "in_transit"].includes(booking.status),
+    ) ??
+    bookings.find((booking) => booking.status === "pending") ??
+    bookings[0];
 
   const pickupLocation = previewBooking
     ? getLocationById(previewBooking.pickupLocationId)

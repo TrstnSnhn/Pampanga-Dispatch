@@ -45,7 +45,7 @@ Outcome: Users can now view a Pampanga-focused map with service-area markers and
 
 ## Phase 3: Booking and Dispatch Logic
 
-Status: In progress. Phase 3A booking and dispatch logic foundation is complete.
+Status: In progress. Phase 3A booking and dispatch logic foundation and Phase 3B workflow polish are complete.
 
 Milestones:
 
@@ -54,10 +54,13 @@ Milestones:
 - Add approximate straight-line distance and price estimate helpers. Complete in Phase 3A.
 - Create a dispatcher view for pending, available, and assigned local session records. Complete in Phase 3A.
 - Implement deterministic driver suggestions using availability, service capability, and nearby current location. Complete in Phase 3A.
+- Add local status operations for pending, assigned, picked up, in transit, completed, and cancelled states. Complete in Phase 3B.
+- Release assigned drivers when a booking is completed or cancelled before pickup. Complete in Phase 3B.
+- Add booking filters and workflow labels for local session review. Complete in Phase 3B.
 - Persist bookings and assignments beyond refresh. Planned.
 - Expand service-specific fields and operational edge cases. Planned.
 
-Outcome: The app now supports local session booking intake and driver assignment previews without pretending to have persistence, authentication, or real road routing.
+Outcome: The app now supports local session booking intake, driver assignment, and a complete demo lifecycle without pretending to have persistence, authentication, or real road routing.
 
 ## Phase 4: Routing and Estimates
 

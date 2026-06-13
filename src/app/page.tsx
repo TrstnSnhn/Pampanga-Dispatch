@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useMemo } from "react";
 import {
   ClipboardList,
   MapPinned,
@@ -10,55 +13,14 @@ import {
 import { MetricCard } from "@/components/metric-card";
 import { PageHeader } from "@/components/page-header";
 import { StatusPill } from "@/components/status-pill";
-import { sampleBookings } from "@/data/sample-bookings";
-import { sampleDrivers } from "@/data/sample-drivers";
 import { getLocationName } from "@/data/pampanga-locations";
 import { dispatchStatusLabels } from "@/domain/dispatch-status";
+import { useDispatchDemo } from "@/features/dispatch/dispatch-demo-provider";
+import {
+  findAvailableDrivers,
+  summarizeDispatchOperations,
+} from "@/lib/dispatch";
 import { formatPeso } from "@/lib/format";
-
-const activeBookings = sampleBookings.filter((booking) =>
-  ["assigned", "picked_up", "in_transit"].includes(booking.status),
-);
-const availableDrivers = sampleDrivers.filter(
-  (driver) => driver.status === "available",
-);
-const pendingBookings = sampleBookings.filter(
-  (booking) => booking.status === "pending",
-);
-const completedBookings = sampleBookings.filter(
-  (booking) => booking.status === "completed",
-);
-
-const summaryCards = [
-  {
-    label: "Active bookings",
-    value: activeBookings.length,
-    note: "Assigned or already moving",
-    icon: ClipboardList,
-    tone: "green" as const,
-  },
-  {
-    label: "Available drivers",
-    value: availableDrivers.length,
-    note: "Ready for dispatch review",
-    icon: Truck,
-    tone: "blue" as const,
-  },
-  {
-    label: "Pending dispatches",
-    value: pendingBookings.length,
-    note: "Waiting for assignment logic",
-    icon: RadioTower,
-    tone: "amber" as const,
-  },
-  {
-    label: "Completed today",
-    value: completedBookings.length,
-    note: "From local sample data",
-    icon: Route,
-    tone: "clay" as const,
-  },
-];
 
 const quickLinks = [
   {
@@ -94,14 +56,52 @@ const quickLinks = [
 ];
 
 export default function Home() {
-  const nextBooking = pendingBookings[0] ?? sampleBookings[0];
+  const { bookings, drivers } = useDispatchDemo();
+  const summary = useMemo(() => summarizeDispatchOperations(bookings), [bookings]);
+  const availableDrivers = useMemo(() => findAvailableDrivers(drivers), [drivers]);
+  const nextBooking =
+    bookings.find((booking) => booking.status === "pending") ??
+    bookings.find((booking) =>
+      ["assigned", "picked_up", "in_transit"].includes(booking.status),
+    ) ??
+    bookings[0];
+  const summaryCards = [
+    {
+      label: "Active bookings",
+      value: summary.active,
+      note: "Assigned, picked up, or in transit",
+      icon: ClipboardList,
+      tone: "green" as const,
+    },
+    {
+      label: "Available drivers",
+      value: availableDrivers.length,
+      note: "Ready for dispatch review",
+      icon: Truck,
+      tone: "blue" as const,
+    },
+    {
+      label: "Pending dispatches",
+      value: summary.pending,
+      note: "Waiting for assignment",
+      icon: RadioTower,
+      tone: "amber" as const,
+    },
+    {
+      label: "Completed today",
+      value: summary.completed,
+      note: "Completed in local session",
+      icon: Route,
+      tone: "clay" as const,
+    },
+  ];
 
   return (
     <div className="space-y-7">
       <PageHeader
         title="Pampanga Dispatch"
         eyebrow="Map-first dispatch console"
-        meta="Phase 3A local logic"
+        meta="Phase 3B workflow polish"
         description="A local operations dashboard for reviewing Pampanga bookings, drivers, dispatch state, and map context."
       />
 
@@ -142,11 +142,12 @@ export default function Home() {
                 Next pending booking
               </p>
               <p className="mt-2 text-sm font-semibold text-[var(--foreground)]">
-                {nextBooking.id}
+                {nextBooking?.id ?? "None"}
               </p>
               <p className="mt-1 text-xs leading-5 text-[var(--muted-foreground)]">
-                {getLocationName(nextBooking.pickupLocationId)} to{" "}
-                {getLocationName(nextBooking.dropOffLocationId)}
+                {nextBooking
+                  ? `${getLocationName(nextBooking.pickupLocationId)} to ${getLocationName(nextBooking.dropOffLocationId)}`
+                  : "Create a local booking to populate this panel."}
               </p>
             </div>
             <div className="rounded-xl bg-[var(--surface-raised)] p-4">
@@ -154,10 +155,12 @@ export default function Home() {
                 Dispatch state
               </p>
               <p className="mt-2 text-sm font-semibold text-[var(--foreground)]">
-                {dispatchStatusLabels[nextBooking.status]}
+                {nextBooking
+                  ? dispatchStatusLabels[nextBooking.status]
+                  : "No booking"}
               </p>
               <p className="mt-1 text-xs leading-5 text-[var(--muted-foreground)]">
-                Driver assignment now runs locally for the current session.
+                Status transitions now run locally for the current session.
               </p>
             </div>
             <div className="rounded-xl bg-[var(--surface-raised)] p-4">
@@ -165,7 +168,7 @@ export default function Home() {
                 Sample estimate
               </p>
               <p className="mt-2 text-sm font-semibold text-[var(--foreground)]">
-                {formatPeso(nextBooking.priceEstimate)}
+                {nextBooking ? formatPeso(nextBooking.priceEstimate) : "None"}
               </p>
               <p className="mt-1 text-xs leading-5 text-[var(--muted-foreground)]">
                 Static local data, not route-calculated.
