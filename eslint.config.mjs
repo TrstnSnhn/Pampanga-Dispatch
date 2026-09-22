@@ -11,6 +11,7 @@ const eslintConfig = [
       "node_modules/**",
       "out/**",
       "build/**",
+      "public/maplibre/**",
       "next-env.d.ts",
     ],
   },
