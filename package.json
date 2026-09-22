@@ -5,7 +5,9 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/prepare-map-worker.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/prepare-map-worker.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -14,8 +16,8 @@
   "dependencies": {
     "clsx": "2.1.1",
     "lucide-react": "^1.18.0",
-    "maplibre-gl": "^5.24.0",
-    "next": "16.2.9",
+    "maplibre-gl": "^6.10.0",
+    "next": "^16.3.5",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "tailwind-merge": "3.6.0"
@@ -26,7 +28,7 @@
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "eslint": "9.39.4",
-    "eslint-config-next": "16.2.9",
+    "eslint-config-next": "^16.3.5",
     "tailwindcss": "4.3.0",
     "typescript": "6.0.3"
   }

@@ -28,3 +28,6 @@ Thumbs.db
 .agents/
 .codex/
 skills-lock.json
+.vercel
+.env*
+/public/maplibre/

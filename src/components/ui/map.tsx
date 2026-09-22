@@ -2,7 +2,8 @@
 
 /* eslint-disable react-hooks/refs */
 import type * as GeoJSON from "geojson";
-import MapLibreGL, { type PopupOptions, type MarkerOptions } from "maplibre-gl";
+import * as MapLibreGL from "maplibre-gl";
+import type { PopupOptions, MarkerOptions } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
   createContext,
@@ -222,6 +223,8 @@ const Map = forwardRef<MapRef, MapProps>(function Map(
       resolvedTheme === "dark" ? mapStyles.dark : mapStyles.light;
     currentStyleRef.current = initialStyle;
 
+    // Next.js must serve both ESM worker files together; prepare-map-worker runs before builds.
+    MapLibreGL.setWorkerUrl('/maplibre/maplibre-gl-worker.mjs');
     const map = new MapLibreGL.Map({
       container: containerRef.current,
       style: initialStyle,
